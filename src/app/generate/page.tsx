@@ -38,15 +38,7 @@ export default function Page() {
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-        }}
-      >
+      <div className="center">
         {!isDone ? (
           <>
             <div>

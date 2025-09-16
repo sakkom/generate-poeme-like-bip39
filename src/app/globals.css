@@ -35,6 +35,15 @@ a {
   text-decoration: none;
 }
 
+/*custom css*/
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
