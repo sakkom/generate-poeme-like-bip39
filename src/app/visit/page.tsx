@@ -18,9 +18,12 @@ export default function Page() {
     setHash(hash);
     const isMatch = await matchHash(hash);
     setIsPoem(isMatch);
+    if (isMatch) {
+      sessionStorage.setItem(hash, value);
+    }
   };
   return (
-    <div>
+    <div className="center">
       <div>
         <input type="text" name="poem" ref={inputRef} onChange={handleChange} />
       </div>
