@@ -1,4 +1,4 @@
-import { KanjiKanaMeaning } from "@/interface/dictInterface";
+// import { KanjiKanaMeaning } from "@/interface/dictInterface";
 import {
   integer,
   pgTable,
@@ -16,5 +16,5 @@ export const hashsTable = pgTable("hashs_table", {
   // createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export type InsertUser = typeof hashsTable.$inferInsert;
-export type SelectUser = typeof hashsTable.$inferSelect;
+// export type InsertUser = typeof hashsTable.$inferInsert;
+// export type SelectUser = typeof hashsTable.$inferSelect;
