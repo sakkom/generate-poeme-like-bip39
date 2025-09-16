@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/index";
 import { hashsTable } from "../db/schema";
 
+/*このときに辞書に組み込む機能をつける */
 export async function createPoem(hash: string) {
   if (!(await isNewPoem(hash))) throw new Error("この詩はすでにあります");
 
@@ -27,6 +28,18 @@ export async function isNewPoem(hash: string) {
       .from(hashsTable)
       .where(eq(hashsTable.hash, hash));
     return results.length === 0;
+  } catch (error) {
+    throw new Error(`データベース検索失敗: ${error}`);
+  }
+}
+
+export async function matchHash(hash: string) {
+  try {
+    const results = await db
+      .select()
+      .from(hashsTable)
+      .where(eq(hashsTable.hash, hash));
+    return results.length > 0;
   } catch (error) {
     throw new Error(`データベース検索失敗: ${error}`);
   }

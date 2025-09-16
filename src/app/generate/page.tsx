@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { KanjiKanaMeaning } from "@/interface/dictInterface";
 import { createPoem } from "@/utils/createPoem";
-import { getPoemHash } from "@/utils/mnemonic";
+import { getPoemHash } from "@/utils/hash";
 import { generateConstrainedHaiku } from "@/utils/randomDict";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Page() {
   const router = useRouter();
@@ -69,6 +70,10 @@ export default function Page() {
               <br />
               この詩を記憶することでこの詩にアクセスできます。
               パスフレーズの詩を記憶しない場合はハックされない限りアクセスされません。
+            </div>
+            <div>
+              <Link href={`/`}>home</Link>
+              <Link href={`/visit`}>詩を確認する</Link>
             </div>
           </>
         )}

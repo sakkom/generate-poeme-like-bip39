@@ -1,7 +1,7 @@
 // import fs from "fs";
 import path from "path";
 import { KanjiKanaMeaning } from "../interface/dictInterface";
-import { SyllableIndexData } from "../../public/dict/jmdict-syllable-index";
+import { SyllableIndexData } from "../dict/jmdict-syllable-index";
 
 // function loadDictJson() {
 //   const filePath = path.join(process.cwd(), "dict", "dict.json");
