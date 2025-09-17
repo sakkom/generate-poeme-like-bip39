@@ -49,3 +49,25 @@ a {
     color-scheme: dark;
   }
 }
+
+@keyframes eastSide {
+  /*from {
+    opacity: 0;
+    transform: translateX(20px);
+  }*/
+  to {
+    opacity: 1;
+    transform: translateX(0px) translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes westSide {
+  /*from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }*/
+  to {
+    opacity: 1;
+    transform: translateX(0px) translateY(0px) rotate(0deg);
+  }
+}

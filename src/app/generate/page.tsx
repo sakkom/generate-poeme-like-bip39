@@ -11,6 +11,7 @@ import Link from "next/link";
 export default function Page() {
   const router = useRouter();
   const [poemWords, setPoem] = useState<KanjiKanaMeaning[]>();
+  const [poetry, setPoetry] = useState<string>();
   //hashはデザインのため取得
   const [hash, setHash] = useState<string>();
   const [isDone, setIsDone] = useState<boolean>(false);
@@ -36,21 +37,53 @@ export default function Page() {
     }
   };
 
+  const handleGenerate = () => {
+    const words = generateConstrainedHaiku();
+    let results = "";
+    words.forEach((word) => {
+      results += word.kanji ? word.kanji : word.kana;
+    });
+    setPoem(words);
+    setPoetry(results);
+  };
+
   return (
     <>
       <div className="center">
         {!isDone ? (
           <>
             <div>
-              {poemWords?.map((word, k) => (
-                <div key={k}>{word.kanji ? word.kanji : word.kana}</div>
-              ))}
-              <div>{hash}</div>
+              <div
+                style={{
+                  writingMode: "vertical-lr",
+                  display: "flex",
+                  flexDirection: "row",
+                  marginBottom: "30px",
+                }}
+              >
+                {poetry?.split("").map((char, i) => {
+                  const randomRotation = Math.random() * 360;
+                  return (
+                    <h2
+                      key={`${poetry}-${i}`}
+                      style={{
+                        opacity: 0,
+                        transform: `${i % 2 == 0 ? `translateX(1rem) translateY(-1rem) rotate(-360deg)` : `translateX(-1rem) translateY(-1rem) rotate(360deg)`}`,
+                        animation:
+                          i % 2 == 0
+                            ? `eastSide 0.3s ease-in 0s forwards`
+                            : `westSide 0.3s ease-in ${0}s forwards`,
+                      }}
+                    >
+                      {char}
+                    </h2>
+                  );
+                })}
+              </div>
+              {/*<div>{hash}</div>*/}
             </div>
-            <div>
-              <button onClick={() => setPoem(generateConstrainedHaiku())}>
-                generate
-              </button>
+            <div style={{ position: "absolute", bottom: 0, left: 0 }}>
+              <button onClick={handleGenerate}>generate</button>
               <button onClick={async () => await commitHash()}>commit</button>
             </div>
           </>
