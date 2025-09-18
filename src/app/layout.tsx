@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Kosugi_Maru, Kaisei_Decol, Alumni_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const alumniSans = Alumni_Sans({
+  weight: "400",
+  variable: "--font-alumni-sans",
+  // display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const kaiseiDecol = Kaisei_Decol({
+  weight: "400",
+  variable: "--font-kaisei-decol",
+  // display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${kaiseiDecol.variable} ${alumniSans.variable}`}>
         {children}
       </body>
     </html>

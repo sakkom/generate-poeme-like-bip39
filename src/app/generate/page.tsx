@@ -71,8 +71,8 @@ export default function Page() {
                         transform: `${i % 2 == 0 ? `translateX(1rem) translateY(-1rem) rotate(-360deg)` : `translateX(-1rem) translateY(-1rem) rotate(360deg)`}`,
                         animation:
                           i % 2 == 0
-                            ? `eastSide 0.3s ease-in 0s forwards`
-                            : `westSide 0.3s ease-in ${0}s forwards`,
+                            ? `eastSide 0.25s ease-in ${i * 0.05}s forwards`
+                            : `westSide 0.25s ease-in ${i * 0.05}s forwards`,
                       }}
                     >
                       {char}

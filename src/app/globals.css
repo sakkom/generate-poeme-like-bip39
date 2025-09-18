@@ -3,6 +3,10 @@
   --foreground: #171717;
 }
 
+body {
+  font-family: var(--font-alumni-sans), var(--font-kaisei-decol), sans-serif;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,7 +23,8 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /*font-family: Arial, Helvetica, sans-serif;*/
+  /*font-family: "Custom-Mixed", sans-serif;*/
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -51,23 +56,79 @@ a {
 }
 
 @keyframes eastSide {
-  /*from {
-    opacity: 0;
-    transform: translateX(20px);
-  }*/
-  to {
+  25% {
+    color: #00ffff;
+  }
+  50% {
+    color: #ffff00;
+  }
+  75% {
+    color: #ff6600;
+  }
+  100% {
     opacity: 1;
+    color: #ffffff;
     transform: translateX(0px) translateY(0px) rotate(0deg);
   }
 }
 
 @keyframes westSide {
-  /*from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }*/
-  to {
+  25% {
+    color: #00ffff;
+  }
+  50% {
+    color: #ffff00;
+  }
+  75% {
+    color: #ff6600;
+  }
+  100% {
     opacity: 1;
+    color: #ffffff; /* 白 */
     transform: translateX(0px) translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes topSide {
+  0% {
+    opacity: 0;
+    color: transparent; /* 色なし */
+    transform: translateY(1rem) rotate(-360deg);
+  }
+  25% {
+    color: #00ffff;
+  }
+  50% {
+    color: #ff6600;
+  }
+  75% {
+    color: #ffff00;
+  }
+  100% {
+    opacity: 1;
+    color: #ffffff; /* 白 */
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes bottomSide {
+  0% {
+    opacity: 0;
+    color: transparent; /* 色なし */
+    transform: translateY(-1rem) rotate(360deg);
+  }
+  25% {
+    color: #00ffff;
+  }
+  50% {
+    color: #ffff00;
+  }
+  75% {
+    color: #ff6600;
+  }
+  100% {
+    opacity: 1;
+    color: #ffffff;
+    transform: translateY(0) rotate(0deg);
   }
 }
