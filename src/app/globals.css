@@ -40,7 +40,21 @@ a {
   text-decoration: none;
 }
 
+h1 {
+  font-size: 2.5rem;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: transparent;
+  padding: 0rem;
+  border-radius: 8px;
+  width: 15vw;
+}
+
 /*custom css*/
+
 .center {
   display: flex;
   flex-direction: column;

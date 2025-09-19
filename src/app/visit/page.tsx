@@ -1,45 +1,57 @@
 "use client";
-
-import { useRef, useState } from "react";
-import { matchHash } from "@/utils/createPoem";
-import { getHash } from "@/utils/hash";
+import { useState } from "react";
+import { matchHash } from "@/utils/addPoetry";
+import { getPoetryHash } from "@/utils/util";
 import Link from "next/link";
+import GridInput from "../../comps/GridInput";
 
-/*/vistから/hashに流れる自然な検索そしてログイン機能を実装 */
 export default function Page() {
   const [hash, setHash] = useState("");
   const [isPoem, setIsPoem] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = async () => {
-    const value = inputRef.current?.value;
-    if (!value) return;
-    const hash = await getHash(value);
-    setHash(hash);
-    const isMatch = await matchHash(hash);
+  const handleContentUpdate = async (text: string) => {
+    console.log("入力されたテキスト:", text);
+
+    if (!text) {
+      setHash("");
+      setIsPoem(false);
+      return;
+    }
+
+    const newHash = await getPoetryHash(text);
+    setHash(newHash);
+    const isMatch = await matchHash(newHash);
     setIsPoem(isMatch);
+
     if (isMatch) {
-      sessionStorage.setItem(hash, value);
+      sessionStorage.setItem(newHash, text);
     }
   };
+
   return (
     <div className="center">
-      <div>
-        <input type="text" name="poem" ref={inputRef} onChange={handleChange} />
-      </div>
-      {isPoem ? (
-        <Link href={`/visit/${hash}`}>
-          http://localhost:3000/
-          <span style={{ color: "pink" }}>{hash}</span>
-        </Link>
-      ) : (
-        <p>
-          http://localhost:3000/<span style={{ color: "gray" }}>{hash}</span>
-        </p>
+      <GridInput
+        maxChars={20}
+        lineLength={5}
+        columnCount={4}
+        onUpdateContent={handleContentUpdate}
+      />
+
+      {hash && (
+        <div style={{ marginTop: "20px" }}>
+          {isPoem ? (
+            <Link href={`/visit/${hash}`}>
+              http://localhost:3000/
+              <span style={{ color: "pink" }}>{hash}</span>
+            </Link>
+          ) : (
+            <p>
+              http://localhost:3000/
+              <span style={{ color: "gray" }}>{hash}</span>
+            </p>
+          )}
+        </div>
       )}
-      <div></div>
     </div>
   );
 }
-// 高気圧環境
-// ルービック・キューブ

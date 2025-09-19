@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Kosugi_Maru, Kaisei_Decol, Alumni_Sans } from "next/font/google";
+import { Kaisei_Decol, Alumni_Sans } from "next/font/google";
 import "./globals.css";
 
 const alumniSans = Alumni_Sans({
   weight: "400",
   variable: "--font-alumni-sans",
+  subsets: ["latin"],
   // display: "swap",
 });
 
 const kaiseiDecol = Kaisei_Decol({
   weight: "400",
   variable: "--font-kaisei-decol",
+  subsets: ["latin"],
   // display: "swap",
 });
 

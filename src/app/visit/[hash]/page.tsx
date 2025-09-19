@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState, use } from "react";
 
 export default function Page({
@@ -23,8 +24,9 @@ export default function Page({
 
   return (
     <div className="center">
+      <Link href={"/"}>home</Link>
       <div>
-        {hash}: {poem}
+        <div>http://localhost:3000/{poem}</div>
       </div>
     </div>
   );

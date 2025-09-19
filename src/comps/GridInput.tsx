@@ -26,7 +26,7 @@ export default function GridInput({
   const [isIme, setIsIme] = useState(false);
   const [imeText, setImeText] = useState<string>("");
 
-  const actualCharCount = content.filter((char) => char !== "").length;
+  // const actualCharCount = content.filter((char) => char !== "").length;
   const positionToIndex = (xPos: number, yPos: number) =>
     xPos * lineLength + yPos;
   const indexToPosition = (index: number) => ({

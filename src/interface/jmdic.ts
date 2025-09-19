@@ -1,4 +1,4 @@
-export interface KanjiKanaMeaning {
+export interface JMdicWord {
   kanji: string | null;
   kana: string;
   meaning: string;

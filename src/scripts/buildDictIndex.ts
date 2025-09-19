@@ -1,7 +1,7 @@
 import fs from "fs";
 // import path from "path";
 // import { parse } from "csv-parse/sync";
-import { JMdictEntry, KanjiKanaMeaning } from "@/interface/dictInterface";
+import { JMdictEntry, JMdicWord } from "@/interface/jmdic";
 
 const jmdictFile = JSON.parse(
   fs.readFileSync("./src/app/dict/jmdict-all-3.6.1.json", "utf-8"),
@@ -38,9 +38,9 @@ function isValidForPoetry(kana: string, meaning: string): boolean {
 }
 
 function createSyllableIndex(
-  allData: KanjiKanaMeaning[],
-): Record<number, KanjiKanaMeaning[]> {
-  const index: Record<number, KanjiKanaMeaning[]> = {};
+  allData: JMdicWord[],
+): Record<number, JMdicWord[]> {
+  const index: Record<number, JMdicWord[]> = {};
   allData.forEach((word) => {
     //初期化
     if (!index[word.syllables]) {
@@ -52,8 +52,8 @@ function createSyllableIndex(
 }
 
 // extractKanjiTexts関数も追加する必要があります
-function extractAll(jmdict: JMdictEntry[]): KanjiKanaMeaning[] {
-  const results: KanjiKanaMeaning[] = [];
+function extractAll(jmdict: JMdictEntry[]): JMdicWord[] {
+  const results: JMdicWord[] = [];
 
   jmdict.forEach((entry) => {
     const meanings =
@@ -101,22 +101,22 @@ function extractAll(jmdict: JMdictEntry[]): KanjiKanaMeaning[] {
   return results;
 }
 
-function main() {
-  const allData = extractAll(jmdictData);
-  const syllableIndex = createSyllableIndex(allData);
-  const outputPath = "./src/app/dict/jmdict-syllable-index.json";
-  fs.writeFileSync(outputPath, JSON.stringify(syllableIndex, null, 2), "utf-8");
+// function main() {
+//   const allData = extractAll(jmdictData);
+//   const syllableIndex = createSyllableIndex(allData);
+//   const outputPath = "./src/app/dict/jmdict-syllable-index.json";
+//   fs.writeFileSync(outputPath, JSON.stringify(syllableIndex, null, 2), "utf-8");
 
-  console.log(`総データ数: ${allData.length}個`);
-  // 統計表示
-  Object.keys(syllableIndex)
-    .sort((a, b) => Number(a) - Number(b))
-    .forEach((syllables) => {
-      console.log(
-        `${syllables}音: ${syllableIndex[Number(syllables)].length}個`,
-      );
-    });
-}
+//   console.log(`総データ数: ${allData.length}個`);
+//   // 統計表示
+//   Object.keys(syllableIndex)
+//     .sort((a, b) => Number(a) - Number(b))
+//     .forEach((syllables) => {
+//       console.log(
+//         `${syllables}音: ${syllableIndex[Number(syllables)].length}個`,
+//       );
+//     });
+// }
 
 /*常用漢字csv -> 常用漢字jsonの変換*/
 // function convertJoyoKanjiCsvToJson() {
