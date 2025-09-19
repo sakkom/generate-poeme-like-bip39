@@ -1,0 +1,268 @@
+"use client";
+import { useState } from "react";
+
+interface GridInputProps {
+  maxChars?: number;
+  lineLength?: number;
+  columnCount?: number;
+  cellSize?: number;
+  onUpdateContent?: (text: string) => void;
+}
+
+interface CursorPos {
+  xPos: number;
+  yPos: number;
+}
+
+export default function GridInput({
+  maxChars = 20,
+  lineLength = 5,
+  columnCount = 4,
+  cellSize = 40,
+  onUpdateContent,
+}: GridInputProps) {
+  const [content, setContent] = useState<string[]>(Array(maxChars).fill(""));
+  const [cursor, setCursor] = useState<CursorPos>({ xPos: 0, yPos: 0 });
+  const [isIme, setIsIme] = useState(false);
+  const [imeText, setImeText] = useState<string>("");
+
+  const actualCharCount = content.filter((char) => char !== "").length;
+  const positionToIndex = (xPos: number, yPos: number) =>
+    xPos * lineLength + yPos;
+  const indexToPosition = (index: number) => ({
+    xPos: Math.floor(index / lineLength),
+    yPos: index % lineLength,
+  });
+  const getCurrentIndex = () => positionToIndex(cursor.xPos, cursor.yPos);
+
+  const updateContent = (newContent: string[]) => {
+    setContent(newContent);
+    onUpdateContent?.(newContent.filter((char) => char !== "").join(""));
+  };
+
+  const clearInput = () => {
+    const input = document.querySelector("input") as HTMLInputElement;
+    if (input) input.value = "";
+  };
+
+  const handleBackSpace = () => {
+    const currentIndex = getCurrentIndex();
+    // 現在のカーソル位置に文字がある場合はそれを削除
+    if (content[currentIndex] !== "") {
+      const newContent = [...content];
+      newContent[currentIndex] = "";
+      updateContent(newContent);
+      return;
+    }
+    // 前の位置に移動して削除
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      const newContent = [...content];
+      newContent[newIndex] = "";
+      updateContent(newContent);
+      setCursor(indexToPosition(newIndex));
+    }
+  };
+
+  const addCharacter = (char: string) => {
+    const currentIndex = getCurrentIndex();
+    if (currentIndex >= maxChars) return;
+
+    const newContent = [...content];
+    newContent[currentIndex] = char;
+    updateContent(newContent);
+
+    const nextIndex = currentIndex + 1;
+    if (nextIndex <= maxChars) {
+      setCursor(indexToPosition(nextIndex));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (isIme) {
+      setImeText(value);
+    } else {
+      if (getCurrentIndex() >= maxChars) {
+        clearInput();
+        return;
+      }
+      if (value[value.length - 1]) {
+        addCharacter(value[value.length - 1]);
+      }
+      clearInput();
+    }
+  };
+
+  const handleCompositionStart = () => setIsIme(true);
+
+  const handleCompositionEnd = (
+    e: React.CompositionEvent<HTMLInputElement>,
+  ) => {
+    const value = e.currentTarget.value;
+
+    if (value) {
+      const currentIndex = getCurrentIndex();
+      const newContent = [...content];
+      let nextIndex = currentIndex;
+
+      for (const char of value) {
+        if (nextIndex >= maxChars) break;
+        newContent[nextIndex] = char;
+        nextIndex++;
+      }
+
+      updateContent(newContent);
+      setCursor(indexToPosition(Math.min(nextIndex, maxChars)));
+    }
+
+    setIsIme(false);
+    setImeText("");
+    clearInput();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isIme) return;
+    if (e.code === "Backspace") {
+      e.preventDefault();
+      handleBackSpace();
+      clearInput();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text").replace(/\s/g, "");
+
+    const currentIndex = getCurrentIndex();
+    const newContent = [...content];
+    let nextIndex = currentIndex;
+
+    for (const char of text) {
+      if (nextIndex >= maxChars) break;
+      newContent[nextIndex] = char;
+      nextIndex++;
+    }
+
+    updateContent(newContent);
+    setCursor(indexToPosition(Math.min(nextIndex, maxChars)));
+    clearInput();
+  };
+  const displayContent = [...content];
+  if (isIme && imeText) {
+    const currentIndex = getCurrentIndex();
+    for (let i = 0; i < imeText.length && currentIndex + i < maxChars; i++) {
+      displayContent[currentIndex + i] = imeText[i];
+    }
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#000",
+        margin: "0",
+        padding: "0",
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          width: `${cellSize * columnCount}px`,
+          height: `${cellSize * lineLength}px`,
+          backgroundColor: "#000",
+        }}
+      >
+        {Array.from({ length: lineLength * columnCount }).map((_, index) => {
+          const yPos = index % lineLength;
+          const xPos = Math.floor(index / lineLength);
+          const cellIndex = positionToIndex(xPos, yPos);
+          const hasChar = content[cellIndex] !== "";
+          const isImeChar =
+            isIme &&
+            cellIndex >= getCurrentIndex() &&
+            cellIndex < getCurrentIndex() + imeText.length;
+
+          return (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                top: `${yPos * cellSize}px`,
+                right: `${xPos * cellSize}px`,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                borderRadius: hasChar ? "0px" : "50%",
+                backgroundColor: hasChar ? "#000" : isImeChar ? "#999" : "#fff",
+              }}
+            />
+          );
+        })}
+
+        {displayContent.map((char, index) => {
+          if (!char) return null;
+          const pos = indexToPosition(index);
+          const isConfirmedChar = content[index] !== "";
+
+          return (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                top: `${pos.yPos * cellSize}px`,
+                right: `${pos.xPos * cellSize}px`,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                fontSize: `${cellSize * 0.6}px`,
+                writingMode: "vertical-rl",
+                zIndex: 10,
+                color: isConfirmedChar ? "#fff" : "#000",
+                fontWeight: "bold",
+              }}
+            >
+              {char}
+            </div>
+          );
+        })}
+
+        <input
+          style={{
+            position: "absolute",
+            top: `${cursor.yPos * cellSize}px`,
+            right: `${cursor.xPos * cellSize}px`,
+            width: `${cellSize}px`,
+            height: `${cellSize}px`,
+            fontSize: `${cellSize * 0.6}px`,
+            textAlign: "center",
+            border: "none",
+            borderRadius: "50%",
+            backgroundColor: "transparent",
+            writingMode: "vertical-rl",
+            transform: "scale(1.05)",
+            transformOrigin: "center",
+            zIndex: 20,
+            outline: "none",
+            color: "transparent",
+            caretColor: "transparent",
+            opacity: getCurrentIndex() >= maxChars ? 0.5 : 1,
+          }}
+          onPaste={handlePaste}
+          onChange={handleChange}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
+          onKeyDown={handleKeyDown}
+          type="text"
+          autoFocus
+        />
+      </div>
+    </div>
+  );
+}
