@@ -23,6 +23,27 @@ export default function Home() {
           <NavigationRotate text="opened" href="/open" />
           <NavigationRotate text="vocabulary" href="/create" />
         </div>
+        {/*<div
+          style={{
+            backgroundColor: "white",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            writingMode: "vertical-lr",
+            height: "100vh",
+            position: "absolute",
+            top: 0,
+            left: "10%",
+            gap: "1rem",
+            color: "black",
+          }}
+        >
+          <div>ホーム</div>
+          <div>生成</div>
+          <div>ログイン</div>
+          <div>公開</div>
+          <div>辞書</div>
+        </div>*/}
       </div>
     </>
   );

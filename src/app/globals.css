@@ -60,7 +60,7 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100dvh;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -144,5 +144,35 @@ button {
     opacity: 1;
     color: #ffffff;
     transform: translateY(0) rotate(0deg);
+  }
+}
+
+button {
+  font-size: 1rem;
+}
+
+.button {
+  font-size: 2rem;
+}
+
+.poetry {
+  font-size: 2.5rem;
+}
+
+.match {
+  font-size: 1.5rem;
+  color: mediumspringgreen;
+  text-decoration: underline;
+}
+
+@media (max-width: 500px) {
+  .poetry {
+    font-size: 2rem;
+  }
+  .button {
+    font-size: 0.8rem;
+  }
+  .match {
+    font-size: 1rem;
   }
 }

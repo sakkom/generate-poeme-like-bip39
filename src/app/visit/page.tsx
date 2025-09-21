@@ -29,27 +29,33 @@ export default function Page() {
   };
 
   return (
-    <div className="center">
+    <div
+      className="center"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "start",
+        padding: "20vmin 0",
+      }}
+    >
       <GridInput
         maxChars={20}
         lineLength={5}
         columnCount={4}
         onUpdateContent={handleContentUpdate}
       />
-
-      {hash && (
-        <div style={{ marginTop: "20px" }}>
-          {isPoem ? (
-            <Link href={`/visit/${hash}`}>
-              http://localhost:3000/
-              <span style={{ color: "pink" }}>{hash}</span>
-            </Link>
-          ) : (
-            <p>
-              http://localhost:3000/
-              <span style={{ color: "gray" }}>{hash}</span>
-            </p>
-          )}
+      {hash && isPoem && (
+        <div
+          style={{
+            height: "60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Link href={`/visit/${hash}`}>
+            <span className="match">マッチ</span>
+          </Link>
         </div>
       )}
     </div>
