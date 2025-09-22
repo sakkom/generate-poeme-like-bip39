@@ -175,10 +175,11 @@ export default function GridInput({
           isIme &&
           cellIndex >= getCurrentIndex() &&
           cellIndex < getCurrentIndex() + imeText.length;
-
+        const colors = ["#00ffff", "#ffff00", "#ff6600"];
         return (
           <div
             key={index}
+            className={cellIndex === 0 && !hasChar ? "cell-bounce" : ""}
             style={{
               position: "absolute",
               top: `${yPos * cellSize}px`,
@@ -189,8 +190,8 @@ export default function GridInput({
               backgroundColor: hasChar
                 ? "transparent"
                 : isImeChar
-                  ? "#999"
-                  : "#fff",
+                  ? "rgba(255,255,255, 0.2)"
+                  : colors[index % 3],
             }}
           />
         );
@@ -216,7 +217,7 @@ export default function GridInput({
               fontSize: `${cellSize * 0.6}px`,
               writingMode: "vertical-rl",
               zIndex: 10,
-              color: isConfirmedChar ? "#fff" : "#000",
+              color: "black",
               fontWeight: "bold",
             }}
           >

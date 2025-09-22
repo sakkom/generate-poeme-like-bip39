@@ -8,7 +8,12 @@ export const NavigationRotate = ({
   href: string;
 }) => {
   return (
-    <Link href={href}>
+    <Link
+      href={href}
+      style={{
+        color: "black !important",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -29,6 +34,7 @@ export const NavigationRotate = ({
                     ? `topSide 0.5s ease-in ${i * 0.05}s forwards`
                     : `bottomSide 0.5s ease-in ${i * 0.05}s forwards`,
                 margin: 0,
+                color: "black",
               }}
             >
               {char}

@@ -1,6 +1,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --rainbow-gradient: radial-gradient(
+    circle,
+    #ff6600 0%,
+    #ffff00 50%,
+    #00ffff 100%
+  );
 }
 
 body {
@@ -11,6 +17,12 @@ body {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --rainbow-gradient: radial-gradient(
+      circle,
+      #ff6600 0%,
+      #ffff00 50%,
+      #00ffff 100%
+    );
   }
 }
 
@@ -21,8 +33,9 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  /*color: var(--foreground);*/
+  /*color: black;*/
+  background: var(--rainbow-gradient);
   /*font-family: Arial, Helvetica, sans-serif;*/
   /*font-family: "Custom-Mixed", sans-serif;*/
   -webkit-font-smoothing: antialiased;
@@ -81,7 +94,7 @@ button {
   }
   100% {
     opacity: 1;
-    color: #ffffff;
+    color: black;
     transform: translateX(0px) translateY(0px) rotate(0deg);
   }
 }
@@ -91,14 +104,14 @@ button {
     color: #00ffff;
   }
   50% {
-    color: #ffff00;
+    color: #ff3300;
   }
   75% {
-    color: #ff6600;
+    color: #ffff00;
   }
   100% {
     opacity: 1;
-    color: #ffffff; /* 白 */
+    color: black; /* 白 */
     transform: translateX(0px) translateY(0px) rotate(0deg);
   }
 }
@@ -106,21 +119,20 @@ button {
 @keyframes topSide {
   0% {
     opacity: 0;
-    color: transparent; /* 色なし */
     transform: translateY(1rem) rotate(-360deg);
   }
   25% {
     color: #00ffff;
   }
   50% {
-    color: #ff6600;
+    color: #ff3300;
   }
   75% {
     color: #ffff00;
   }
   100% {
     opacity: 1;
-    color: #ffffff; /* 白 */
+    color: black; /* 白 */
     transform: translateY(0) rotate(0deg);
   }
 }
@@ -128,22 +140,31 @@ button {
 @keyframes bottomSide {
   0% {
     opacity: 0;
-    color: transparent; /* 色なし */
     transform: translateY(-1rem) rotate(360deg);
   }
   25% {
     color: #00ffff;
   }
   50% {
-    color: #ffff00;
+    color: #ff3300;
   }
   75% {
-    color: #ff6600;
+    color: #ffff00;
   }
   100% {
     opacity: 1;
-    color: #ffffff;
+    color: black;
     transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+    /*transform: translateX(0);*/
   }
 }
 
@@ -152,7 +173,7 @@ button {
 }
 
 .button {
-  font-size: 2rem;
+  font-size: 1rem;
 }
 
 .poetry {
@@ -163,6 +184,26 @@ button {
   font-size: 1.5rem;
   color: mediumspringgreen;
   text-decoration: underline;
+}
+.dialog-poetry {
+  font-size: 1.5rem;
+}
+.dialog-circle {
+  /*background-color: rgba(255, 255, 255, 0.8);*/
+  background: radial-gradient(circle, #ff6600 0%, #ffff00 50%, #00ffff 100%);
+  max-width: 110vmin;
+  max-height: 110vmin;
+  min-width: 110vmin;
+  min-height: 110vmin;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
 
 @media (max-width: 500px) {
@@ -175,4 +216,27 @@ button {
   .match {
     font-size: 1rem;
   }
+  .dialog-poetry {
+    font-size: 1rem;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.cell-bounce {
+  animation: bounce 1.5s ease-in-out infinite;
 }

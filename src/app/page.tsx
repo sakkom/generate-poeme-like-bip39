@@ -9,12 +9,14 @@ export default function Home() {
         <div
           style={{
             width: "80%",
-            minHeight: "100vh",
+            minHeight: "100dvh",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            border: "1px solid white",
+            // border: "1px solid white",
+            background:
+              "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
           }}
         >
           <NavigationRotate text="About" href="/about" />

@@ -31,13 +31,11 @@ export default function Page() {
   return (
     <div
       className="center"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "start",
-        padding: "20vmin 0",
-      }}
+      style={{ display: "flex", flexDirection: "column", gap: "5vmin" }}
     >
+      {hash && isPoem && (
+        <div style={{ color: "#ff00ff", fontWeight: "bold" }}>マッチ!</div>
+      )}
       <GridInput
         maxChars={20}
         lineLength={5}
@@ -47,14 +45,34 @@ export default function Page() {
       {hash && isPoem && (
         <div
           style={{
-            height: "60px",
+            width: "200px",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.5)",
+            padding: "1vmin",
+            borderRadius: "1vmin",
           }}
         >
           <Link href={`/visit/${hash}`}>
-            <span className="match">マッチ</span>
+            <div
+              style={{
+                color: "black",
+              }}
+            >
+              www.poetry-loggin.net/
+              <span style={{ wordBreak: "break-all" }}>
+                {hash?.split("").map((char, index) => {
+                  const colors = ["#00ffff", "#ffff00", "#ff6600"]; // 赤、緑、青
+                  return (
+                    <span key={index} style={{ color: colors[index % 3] }}>
+                      {char}
+                    </span>
+                  );
+                })}
+              </span>
+            </div>
           </Link>
         </div>
       )}
