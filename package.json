@@ -16,7 +16,6 @@
     "drizzle-orm": "^0.44.5",
     "kuromojin": "^3.0.1",
     "next": "15.5.3",
-    "p5": "^2.0.5",
     "postgres": "^3.4.7",
     "radix-ui": "^1.4.3",
     "react": "19.1.0",
@@ -24,9 +23,9 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/p5": "^1.7.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.180.0",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",

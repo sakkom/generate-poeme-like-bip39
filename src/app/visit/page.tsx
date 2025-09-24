@@ -10,8 +10,6 @@ export default function Page() {
   const [isPoem, setIsPoem] = useState(false);
 
   const handleContentUpdate = async (text: string) => {
-    console.log("入力されたテキスト:", text);
-
     if (!text) {
       setHash("");
       setIsPoem(false);
@@ -31,17 +29,8 @@ export default function Page() {
   return (
     <div
       className="center"
-      style={{ display: "flex", flexDirection: "column", gap: "5vmin" }}
+      style={{ display: "flex", flexDirection: "column", gap: "3vmin" }}
     >
-      {hash && isPoem && (
-        <div style={{ color: "#ff00ff", fontWeight: "bold" }}>マッチ!</div>
-      )}
-      <GridInput
-        maxChars={20}
-        lineLength={5}
-        columnCount={4}
-        onUpdateContent={handleContentUpdate}
-      />
       {hash && isPoem && (
         <div
           style={{
@@ -50,7 +39,6 @@ export default function Page() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.5)",
             padding: "1vmin",
             borderRadius: "1vmin",
           }}
@@ -64,7 +52,7 @@ export default function Page() {
               www.poetry-loggin.net/
               <span style={{ wordBreak: "break-all" }}>
                 {hash?.split("").map((char, index) => {
-                  const colors = ["#00ffff", "#ffff00", "#ff6600"]; // 赤、緑、青
+                  const colors = ["#00ffff", "#ffff00", "#ff6600"];
                   return (
                     <span key={index} style={{ color: colors[index % 3] }}>
                       {char}
@@ -76,6 +64,12 @@ export default function Page() {
           </Link>
         </div>
       )}
+      <GridInput
+        maxChars={20}
+        lineLength={5}
+        columnCount={4}
+        onUpdateContent={handleContentUpdate}
+      />
     </div>
   );
 }

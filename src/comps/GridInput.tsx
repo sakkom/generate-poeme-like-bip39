@@ -1,4 +1,5 @@
 "use client";
+import { whiteOYC } from "@/color";
 import { useState } from "react";
 
 interface GridInputProps {
@@ -175,7 +176,13 @@ export default function GridInput({
           isIme &&
           cellIndex >= getCurrentIndex() &&
           cellIndex < getCurrentIndex() + imeText.length;
-        const colors = ["#00ffff", "#ffff00", "#ff6600"];
+        const whiteOYCarray = [whiteOYC.orange, whiteOYC.yellow, whiteOYC.cyan];
+        const dynamicColor = hasChar
+          ? "transparent"
+          : isImeChar
+            ? "rgba(255,255,255, 0.2)"
+            : whiteOYCarray[index % 3];
+        console.log(`dynamicColor: ${dynamicColor}`);
         return (
           <div
             key={index}
@@ -187,11 +194,12 @@ export default function GridInput({
               width: `${cellSize}px`,
               height: `${cellSize}px`,
               borderRadius: hasChar ? "0px" : "50%",
-              backgroundColor: hasChar
+              background: hasChar
                 ? "transparent"
-                : isImeChar
-                  ? "rgba(255,255,255, 0.2)"
-                  : colors[index % 3],
+                : `radial-gradient(circle, ${dynamicColor} 0%, #fff 90%)`,
+              boxShadow: hasChar
+                ? "none"
+                : "0px 0px 20px rgba(255, 255, 255, 0.8)",
             }}
           />
         );
@@ -219,6 +227,8 @@ export default function GridInput({
               zIndex: 10,
               color: "black",
               fontWeight: "bold",
+              background: "transparent",
+              textShadow: "0px 0px 10px rgba(255, 255, 255, 1.0)",
             }}
           >
             {char}
@@ -246,6 +256,7 @@ export default function GridInput({
           color: "transparent",
           caretColor: "transparent",
           opacity: getCurrentIndex() >= maxChars ? 0.5 : 1,
+          // boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.8)",
         }}
         onPaste={handlePaste}
         onChange={handleChange}

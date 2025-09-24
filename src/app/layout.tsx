@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Kaisei_Decol, Alumni_Sans } from "next/font/google";
 import "./globals.css";
+import { Background } from "@/Background";
 
 const alumniSans = Alumni_Sans({
   weight: "400",
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${kaiseiDecol.variable} ${alumniSans.variable}`}>
-        {children}
+        <Background>{children}</Background>
       </body>
     </html>
   );

@@ -1,8 +1,15 @@
 "use client";
-
 import { NavigationRotate } from "../comps/NavigationRotate";
 
 export default function Home() {
+  const items = [
+    { text: "About", href: "/about" },
+    { text: "Generate", href: "/generate" },
+    { text: "Login", href: "/visit" },
+    { text: "opened", href: "/open" },
+    { text: "vocabulary", href: "/create" },
+  ];
+
   return (
     <>
       <div className="center">
@@ -11,41 +18,42 @@ export default function Home() {
             width: "80%",
             minHeight: "100dvh",
             display: "flex",
-            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            // border: "1px solid white",
-            background:
-              "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
+            position: "relative",
           }}
         >
-          <NavigationRotate text="About" href="/about" />
-          <NavigationRotate text="Generate" href="/generate" />
-          <NavigationRotate text="Login" href="/visit" />
-          <NavigationRotate text="opened" href="/open" />
-          <NavigationRotate text="vocabulary" href="/create" />
+          {/* 円形配置のコンテナ */}
+          <div
+            style={{
+              position: "relative",
+              width: "400px",
+              height: "400px",
+            }}
+          >
+            {items.map((item, index) => {
+              const angle =
+                ((2 * Math.PI) / items.length) * index - Math.PI / 2; // -90度からスタート
+              const radius = 150;
+              const x = 200 + Math.cos(angle) * radius;
+              const y = 200 + Math.sin(angle) * radius;
+
+              return (
+                <div
+                  key={item.text}
+                  style={{
+                    position: "absolute",
+                    left: x - 80, // テキスト幅を考慮
+                    top: y - 30, // テキスト高さを考慮
+                    transform: "translate(-50%, -50%)", // 中心合わせ
+                  }}
+                >
+                  <NavigationRotate text={item.text} href={item.href} />
+                </div>
+              );
+            })}
+          </div>
         </div>
-        {/*<div
-          style={{
-            backgroundColor: "white",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            writingMode: "vertical-lr",
-            height: "100vh",
-            position: "absolute",
-            top: 0,
-            left: "10%",
-            gap: "1rem",
-            color: "black",
-          }}
-        >
-          <div>ホーム</div>
-          <div>生成</div>
-          <div>ログイン</div>
-          <div>公開</div>
-          <div>辞書</div>
-        </div>*/}
       </div>
     </>
   );

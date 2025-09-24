@@ -35,6 +35,7 @@ export const NavigationRotate = ({
                     : `bottomSide 0.5s ease-in ${i * 0.05}s forwards`,
                 margin: 0,
                 color: "black",
+                // textShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
               }}
             >
               {char}
