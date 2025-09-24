@@ -37,7 +37,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
           ${whiteOYC.yellow} ${middleStop}%,
           ${whiteOYC.cyan} 100%
         )`,
-        minHeight: "100vh",
+        minHeight: "100dvh",
         width: "100%",
       }}
     >
