@@ -1,12 +1,19 @@
 // import { JMdicWord } from "@/interface/dictInterface";
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 export const hashsTable = pgTable("hashs_table", {
   id: serial("id").primaryKey(),
   hash: text("hash").notNull(),
-  // opened: boolean("monostic").default(false).notNull(),
-  // poem: text("poem").array().$type<JMdicWord>(),
-  // createdAt: timestamp("created_at").notNull().defaultNow(),
+  opened: boolean("opened").default(false).notNull(),
+  poetry: text("poetry").default(null),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const dictionaryTable = pgTable("dictionary", {

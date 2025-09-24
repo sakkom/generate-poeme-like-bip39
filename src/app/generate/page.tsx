@@ -1,5 +1,5 @@
 "use client";
-import { createPoem } from "@/utils/addPoetry";
+import { createPrivatePoetry, createPublicPoetry } from "@/utils/addPoetry";
 import { getPoetryHash } from "@/utils/util";
 import { getPoetry } from "@/utils/client";
 import { useEffect, useState } from "react";
@@ -22,11 +22,24 @@ export default function Page() {
     })();
   }, [poetry]);
 
-  const handleRegisterPoetry = async () => {
+  const handleAddPrivatePoetry = async () => {
     if (!poetry || !hash) return;
 
     try {
-      const createdHash = await createPoem(hash);
+      const createdHash = await createPrivatePoetry(hash);
+      if (createdHash) {
+        setIsDone(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAddPublicPoetry = async () => {
+    if (!poetry || !hash) return;
+
+    try {
+      const createdHash = await createPublicPoetry(hash, poetry);
       if (createdHash) {
         setIsDone(true);
       }
@@ -57,7 +70,8 @@ export default function Page() {
             poetry={poetry}
             hash={hash}
             handleGeneratePoetry={handleGeneratePoetry}
-            handleRegisterPoetry={handleRegisterPoetry}
+            handleAddPrivatePoetry={handleAddPrivatePoetry}
+            handleAddPublicPoetry={handleAddPublicPoetry}
             poetryLoading={poetryLoading}
           />
         ) : (
@@ -72,7 +86,8 @@ interface GeneratePageProps {
   poetry?: string;
   hash?: string;
   handleGeneratePoetry: () => Promise<void>;
-  handleRegisterPoetry: () => Promise<void>;
+  handleAddPrivatePoetry: () => Promise<void>;
+  handleAddPublicPoetry: () => Promise<void>;
   poetryLoading: boolean;
 }
 
@@ -80,7 +95,8 @@ const GeneratePage = ({
   poetry,
   hash,
   handleGeneratePoetry,
-  handleRegisterPoetry,
+  handleAddPrivatePoetry,
+  handleAddPublicPoetry,
   poetryLoading, // 追加
 }: GeneratePageProps) => {
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
@@ -289,7 +305,7 @@ const GeneratePage = ({
                         }}
                       >
                         <button
-                          onClick={handleRegisterPoetry}
+                          onClick={handleAddPrivatePoetry}
                           style={{
                             // alignItems: "center",
                             // backgroundColor: "#00ffff",
@@ -318,6 +334,7 @@ const GeneratePage = ({
         )}
         {poetry && !poetryLoading && (
           <CircleButton
+            onClick={handleAddPublicPoetry}
             background={whiteOYC.cyan}
             style={{
               bottom:
