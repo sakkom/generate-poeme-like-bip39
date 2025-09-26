@@ -1,100 +1,154 @@
-import Link from "next/link";
+"use client";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useRef, useEffect } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Background } from "@/comps/Background";
+import { getPoetriesWindow } from "@/utils/database";
 
 export default function Page() {
-  const items = [
-    { text: "About", href: "/about" },
-    { text: "Generate", href: "/generate" },
-    { text: "Login", href: "/visit" },
-    { text: "opened", href: "/open" },
-    { text: "vocabulary", href: "/create" },
-  ];
+  const parentRef = useRef<HTMLDivElement>(null);
+  const ITEM_WIDTH = 150;
 
-  return (
-    <div className="center">
-      <div
-        style={{
-          minHeight: "100dvh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CircularText items={items} />
-      </div>
-    </div>
-  );
-}
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+    useInfiniteQuery({
+      queryKey: ["poetries-infinite"],
+      queryFn: ({ pageParam = 0 }) => {
+        console.log("取得開始位置:", pageParam);
+        return getPoetriesWindow(pageParam, 30);
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages, lastPageParam) => {
+        if (lastPage.poetries.length < 30) return undefined;
+        return lastPageParam + 30;
+      },
+    });
 
-const CircularText = ({
-  items,
-}: {
-  items: { text: string; href: string }[];
-}) => {
-  const fontSize = 8;
-  const radius = 30; // vmin
-  const gap = 3; // 単語間のgap（文字数相当）
+  const allItems = data?.pages.flatMap((page) => page.poetries) ?? [];
 
-  // 総文字数 + gap計算
-  const totalChars = items.reduce((sum, item) => sum + item.text.length, 0);
-  const totalWithGaps = totalChars + items.length * gap;
+  // TanStack Virtualを使用して水平仮想化
+  const virtualizer = useVirtualizer({
+    count: hasNextPage ? allItems.length + 1 : allItems.length, // ローディングアイテムのために+1
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ITEM_WIDTH,
+    horizontal: true, // 水平スクロール
+    overscan: 0, // 可視範囲外の前後5アイテムもレンダリング
+  });
 
-  let currentPosition = 0;
+  // ESLint警告を修正：複雑な式を変数に抽出
+  const virtualItems = virtualizer.getVirtualItems();
 
-  const lastWordIndex = items.length - 1;
-  const lastWordLength = items[lastWordIndex].text.length - 1;
-  const allCharsCompleteTime = lastWordIndex * 0.2 + lastWordLength * 0.03 + 1; // 1sはfadeIn時間
+  // 無限スクロールのロジック
+  useEffect(() => {
+    const [lastItem] = [...virtualItems].reverse();
+
+    if (!lastItem) return;
+
+    if (
+      lastItem.index >= allItems.length - 1 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [
+    hasNextPage,
+    fetchNextPage,
+    allItems.length,
+    isFetchingNextPage,
+    virtualItems,
+  ]);
+
+  if (status === "pending") return <div>読み込み中...</div>;
+  if (status === "error") return <div>エラーが発生しました</div>;
 
   return (
     <div
       style={{
-        position: "relative",
-        width: `${radius * 2}vmin`,
-        height: `${radius * 2}vmin`,
-        animation: "rotate 60s linear infinite",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      {items.map((item, itemIndex) => {
-        return (
-          <Link key={item.text} href={item.href}>
-            {item.text.split("").map((char, charIndex) => {
-              const angle = (currentPosition / totalWithGaps) * 2 * Math.PI;
-              const x = radius + Math.cos(angle - Math.PI / 2) * radius;
-              const y = radius + Math.sin(angle - Math.PI / 2) * radius;
+      <div
+        ref={parentRef}
+        style={{
+          position: "relative",
+          height: "100dvh",
+          width: "90%",
+          overflowX: "auto",
+          overflowY: "hidden",
+          scrollbarColor: "blue",
+        }}
+      >
+        <div
+          style={{
+            width: `${virtualizer.getTotalSize()}px`,
+            position: "relative",
+          }}
+        >
+          {virtualItems.map((virtualItem) => {
+            const isLoaderItem = virtualItem.index > allItems.length - 1;
+            const poetry = allItems[virtualItem.index];
 
-              currentPosition++;
-
-              const wordDelay = itemIndex * 0.2; // 各単語間0.2秒差
-              const charDelay = charIndex * 0.03; // 各文字間0.03秒差
-              const totalDelay = wordDelay + charDelay;
-
+            if (isLoaderItem) {
               return (
-                <span
-                  key={`${item.text}-${charIndex}`}
+                <div
+                  key={virtualItem.key}
                   style={{
                     position: "absolute",
-                    left: `${x}vmin`,
-                    top: `${y}vmin`,
-                    fontSize: `${fontSize}vmin`,
-                    // fontWeight: "bold",
-                    color: "black",
-                    // transform: `translate(-50%, -50%) rotate(${angle}rad)`,
-                    // opacity: 1.0,
-                    transform: `translate(-50%, -50%) rotate(${angle}rad)`,
-                    cursor: "pointer",
+                    top: 0,
+                    left: `${virtualItem.start}px`,
+                    width: `${virtualItem.size}px`,
+                    height: "100dvh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    writingMode: "vertical-rl",
+                    color: "#ffaa99",
+                    fontSize: "1rem",
                   }}
                 >
-                  {char}
-                </span>
+                  {hasNextPage ? "Loading..." : ""}
+                </div>
               );
-            })}
-            {itemIndex < items.length - 1 &&
-              (() => {
-                currentPosition += gap;
-                return null;
-              })()}
-          </Link>
-        );
-      })}
+            }
+
+            // 90s スタイルのチェックを削除
+            return (
+              <div
+                key={virtualItem.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${virtualItem.start}px`,
+                  width: `${virtualItem.size}px`,
+                  height: "100dvh",
+                  writingMode: "vertical-rl",
+                  // padding: "20px",
+                  background: "transparent",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "flex-start",
+                  whiteSpace: "nowrap",
+                  fontSize: "1.3rem",
+                  paddingTop: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    writingMode: "vertical-rl",
+                    color: "black",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {poetry.poetry}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
-};
+}

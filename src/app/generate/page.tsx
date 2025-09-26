@@ -1,12 +1,13 @@
 "use client";
-import { createPrivatePoetry, createPublicPoetry } from "@/utils/addPoetry";
 import { getPoetryHash } from "@/utils/util";
-import { getPoetry } from "@/utils/client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CopyIcon } from "@radix-ui/react-icons";
 import { CircleButton } from "@/comps/CircleButton";
-import { whiteOYC } from "@/color";
+import { whiteOYC } from "@/comps/color";
+import { generatePoetry } from "@/utils/generate";
+import { savePrivatePoetry, savePublicPoetry } from "@/utils/database";
 
 export default function Page() {
   const [poetry, setPoetry] = useState<string>();
@@ -26,7 +27,7 @@ export default function Page() {
     if (!poetry || !hash) return;
 
     try {
-      const createdHash = await createPrivatePoetry(hash);
+      const createdHash = await savePrivatePoetry(hash);
       if (createdHash) {
         setIsDone(true);
       }
@@ -39,7 +40,7 @@ export default function Page() {
     if (!poetry || !hash) return;
 
     try {
-      const createdHash = await createPublicPoetry(hash, poetry);
+      const createdHash = await savePublicPoetry(hash, poetry);
       if (createdHash) {
         setIsDone(true);
       }
@@ -51,7 +52,7 @@ export default function Page() {
   const handleGeneratePoetry = async () => {
     setPoetryLoading(true);
     try {
-      const poetry = await getPoetry();
+      const poetry = await generatePoetry();
       if (!poetry || poetry.length === 0) return;
 
       setPoetry(poetry);

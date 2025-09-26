@@ -1,7 +1,7 @@
 import fs from "fs";
 // import path from "path";
 // import { parse } from "csv-parse/sync";
-import { JMdictEntry, JMdicWord } from "@/interface/jmdic";
+import { JMdictEntry, JMdicWord } from "@/scripts/jmdic";
 
 const jmdictFile = JSON.parse(
   fs.readFileSync("./src/app/dict/jmdict-all-3.6.1.json", "utf-8"),

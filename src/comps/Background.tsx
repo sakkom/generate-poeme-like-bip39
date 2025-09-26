@@ -2,7 +2,13 @@
 import { useState, useEffect } from "react";
 import { whiteOYC } from "./color";
 
-export const Background = ({ children }: { children: React.ReactNode }) => {
+export const Background = ({
+  children,
+  width = 100,
+}: {
+  children: React.ReactNode;
+  width?: number;
+}) => {
   const [middleStop, setMiddleStop] = useState(50);
 
   useEffect(() => {
@@ -38,7 +44,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
           ${whiteOYC.cyan} 100%
         )`,
         minHeight: "100dvh",
-        width: "100%",
+        width: `${width}%`,
       }}
     >
       {children}

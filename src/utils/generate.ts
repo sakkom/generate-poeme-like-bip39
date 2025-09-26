@@ -1,7 +1,7 @@
-import { JMdicWord } from "../interface/jmdic";
-import { db } from "@/db";
-import { dictionaryTable } from "@/db/schema";
-import { sql, inArray } from "drizzle-orm";
+"use server";
+import { JMdicWord } from "../scripts/jmdic";
+import { SelectDictionary } from "@/db/schema";
+import { getWordsByPattern } from "./database";
 
 function generate17Pattern(): number[] {
   // const wordCount = Math.random() < 0.6 ? 2 : 3;
@@ -30,12 +30,7 @@ function generate17Pattern(): number[] {
 
 export async function generatePoetry(): Promise<string> {
   const pattern = generate17Pattern();
-  const words = await db
-    .select()
-    .from(dictionaryTable)
-    .where(inArray(dictionaryTable.syllables, pattern))
-    .orderBy(sql`RANDOM()`)
-    .limit(200);
+  const words: SelectDictionary[] = await getWordsByPattern(pattern);
 
   const groups = new Map();
   words.forEach((w) => {

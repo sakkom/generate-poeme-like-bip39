@@ -1,28 +1,24 @@
 "use client";
 import { useState } from "react";
-import { matchHash } from "@/utils/addPoetry";
 import { getPoetryHash } from "@/utils/util";
 import Link from "next/link";
 import GridInput from "../../comps/GridInput";
+import { hasHash } from "@/utils/database";
 
 export default function Page() {
-  const [hash, setHash] = useState("");
-  const [isPoem, setIsPoem] = useState(false);
+  const [poetryHash, setPoetryHash] = useState("");
+  const [hasPoetry, setHasPoetry] = useState(false);
 
-  const handleContentUpdate = async (text: string) => {
-    if (!text) {
-      setHash("");
-      setIsPoem(false);
-      return;
-    }
+  const handleContentUpdate = async (inputPoetry: string) => {
+    if (!inputPoetry) return;
 
-    const newHash = await getPoetryHash(text);
-    setHash(newHash);
-    const isMatch = await matchHash(newHash);
-    setIsPoem(isMatch);
+    const poetryHash = await getPoetryHash(inputPoetry);
+    const isMatch = await hasHash(inputPoetry);
 
     if (isMatch) {
-      sessionStorage.setItem(newHash, text);
+      setHasPoetry(isMatch);
+      setPoetryHash(poetryHash);
+      sessionStorage.setItem(poetryHash, inputPoetry);
     }
   };
 
@@ -31,7 +27,7 @@ export default function Page() {
       className="center"
       style={{ display: "flex", flexDirection: "column", gap: "3vmin" }}
     >
-      {hash && isPoem && (
+      {hasPoetry && poetryHash && (
         <div
           style={{
             width: "200px",
@@ -43,7 +39,7 @@ export default function Page() {
             borderRadius: "1vmin",
           }}
         >
-          <Link href={`/visit/${hash}`}>
+          <Link href={`/visit/${poetryHash}`}>
             <div
               style={{
                 color: "black",
@@ -51,7 +47,7 @@ export default function Page() {
             >
               www.poetry-loggin.net/
               <span style={{ wordBreak: "break-all" }}>
-                {hash?.split("").map((char, index) => {
+                {poetryHash?.split("").map((char, index) => {
                   const colors = ["#00ffff", "#ffff00", "#ff6600"];
                   return (
                     <span key={index} style={{ color: colors[index % 3] }}>
