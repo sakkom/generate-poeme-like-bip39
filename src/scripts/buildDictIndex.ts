@@ -2,6 +2,7 @@ import fs from "fs";
 // import path from "path";
 // import { parse } from "csv-parse/sync";
 import { JMdictEntry, JMdicWord } from "@/scripts/jmdic";
+import { countMora } from "@/utils/util";
 
 const jmdictFile = JSON.parse(
   fs.readFileSync("./src/app/dict/jmdict-all-3.6.1.json", "utf-8"),
@@ -13,10 +14,6 @@ const joyoKanjiData = JSON.parse(
   fs.readFileSync("./src/app/dict/regular_use_utf8.json", "utf-8"),
 );
 const JOYO_KANJI = new Set(joyoKanjiData);
-
-function countMora(kana: string): number {
-  return kana.replace(/[ゃゅょっャュョッ]/g, "").length;
-}
 
 function isCommonKanji(kanjiText: string | null): boolean {
   if (!kanjiText) return true;
@@ -69,13 +66,13 @@ function extractAll(jmdict: JMdictEntry[]): JMdicWord[] {
         }
 
         entry.kana.forEach((ka) => {
-          meanings.forEach((m) => {
+          meanings.forEach(async (m) => {
             if (isValidForPoetry(ka.text, m)) {
               results.push({
                 kanji: k.text,
                 kana: ka.text,
                 meaning: m,
-                syllables: countMora(ka.text),
+                syllables: await countMora(ka.text),
               });
             }
           });
@@ -84,13 +81,13 @@ function extractAll(jmdict: JMdictEntry[]): JMdicWord[] {
     } else {
       // ひらがな・カタカナのみのエントリ
       entry.kana.forEach((ka) => {
-        meanings.forEach((m) => {
+        meanings.forEach(async (m) => {
           if (isValidForPoetry(ka.text, m)) {
             results.push({
               kanji: null,
               kana: ka.text,
               meaning: m,
-              syllables: countMora(ka.text),
+              syllables: await countMora(ka.text),
             });
           }
         });

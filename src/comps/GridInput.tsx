@@ -1,5 +1,5 @@
 "use client";
-import { whiteOYC } from "@/color";
+import { whiteOYC } from "@/comps/color";
 import { useState } from "react";
 
 interface GridInputProps {

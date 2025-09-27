@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Kaisei_Decol, Alumni_Sans } from "next/font/google";
 import "./globals.css";
 import { Background } from "@/comps/Background";
+import { WidthIcon } from "@radix-ui/react-icons";
 
 const alumniSans = Alumni_Sans({
   weight: "400",

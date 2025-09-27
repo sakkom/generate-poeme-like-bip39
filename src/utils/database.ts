@@ -1,7 +1,14 @@
 "use server";
 import { db } from "@/db";
-import { hashsTable, dictionaryTable, SelectDictionary } from "@/db/schema";
+import {
+  hashsTable,
+  dictionaryTable,
+  SelectDictionary,
+  InsertCustomDictionary,
+  customDictionaryTable,
+} from "@/db/schema";
 import { sql, inArray, eq, asc } from "drizzle-orm";
+import { countMora } from "./util";
 
 /*utils------------------------------------------------------------------------------------------------------ */
 export async function hasHash(hash: string) {
@@ -78,3 +85,19 @@ export async function getPoetriesWindow(
     .offset(startIndex);
   return { poetries: results };
 }
+
+/*みんなの辞書------------------------------------------------------------------------------------------------------ */
+export async function saveCustomWord(kanji: string, kana: string) {
+  const syllables = await countMora(kana);
+  try {
+    const [result] = await db
+      .insert(customDictionaryTable)
+      .values({ kanji, kana, syllables })
+      .returning();
+    console.log("save custom word", result);
+  } catch (err) {
+    throw new Error("Custom dictionary save error", err);
+  }
+}
+
+saveCustomWord("kickout", "きっくあうと");

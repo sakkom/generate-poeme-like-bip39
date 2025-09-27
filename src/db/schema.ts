@@ -25,8 +25,18 @@ export const dictionaryTable = pgTable("dictionary", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const customDictionaryTable = pgTable("custom_dictionary", {
+  id: serial("id").primaryKey(),
+  kana: text("kana").notNull(),
+  kanji: text("kanji"),
+  syllables: integer("syllables").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // export type InsertUser = typeof hashsTable.$inferInsert;
 // export type SelectUser = typeof hashsTable.$inferSelect;
 
 export type InsertDictionary = typeof dictionaryTable.$inferInsert;
 export type SelectDictionary = typeof dictionaryTable.$inferSelect;
+
+export type InsertCustomDictionary = typeof customDictionaryTable.$inferInsert;
