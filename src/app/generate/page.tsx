@@ -8,6 +8,9 @@ import { CircleButton } from "@/comps/CircleButton";
 import { whiteOYC } from "@/comps/color";
 import { generatePoetry } from "@/utils/generate";
 import { savePrivatePoetry, savePublicPoetry } from "@/utils/database";
+import { Drawer } from "@/comps/Drawer";
+import { PoetryChar } from "@/comps/PoetryChar";
+import { Background } from "@/comps/Background";
 
 export default function Page() {
   const [poetry, setPoetry] = useState<string>();
@@ -102,6 +105,7 @@ const GeneratePage = ({
 }: GeneratePageProps) => {
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [isCopy, setIsCopy] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleCopyPoetry = async () => {
     if (!poetry) return;
@@ -116,7 +120,18 @@ const GeneratePage = ({
   };
   return (
     <>
-      <div style={{ width: "80%", height: "90dvh" }} className="center">
+      {isDrawerOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            zIndex: 99,
+          }}
+          onClick={() => setIsDrawerOpen(false)}
+        />
+      )}
+      <div style={{ width: "80%", height: "65dvh" }} className="center">
         <div
           style={{
             writingMode: "vertical-rl",
@@ -125,25 +140,9 @@ const GeneratePage = ({
             flexWrap: "wrap",
           }}
         >
-          {poetry?.split("").map((char, i) => {
-            return (
-              <h1
-                className="poetry"
-                key={`${poetry}-${i}`}
-                style={{
-                  opacity: 0,
-                  transform: `${i % 2 == 0 ? `translateX(1rem) translateY(-1rem) rotate(-360deg)` : `translateX(-1rem) translateY(-1rem) rotate(360deg)`}`,
-                  animation:
-                    i % 2 == 0
-                      ? `eastSide 0.5s ease-in ${i * 0.05}s forwards`
-                      : `westSide 0.5s ease-in ${i * 0.05}s forwards`,
-                  textShadow: "0 0 10px rgba(255, 255, 255, 1.0)",
-                }}
-              >
-                {char}
-              </h1>
-            );
-          })}
+          {poetry?.split("").map((char, i) => (
+            <PoetryChar key={`${poetry}-${i}`} char={char} index={i} />
+          ))}
         </div>
       </div>
       <div>
@@ -161,11 +160,11 @@ const GeneratePage = ({
         >
           {poetryLoading ? "生成中..." : "生成"}
         </CircleButton>
-
-        {poetry && !poetryLoading && (
+        {poetry && !poetryLoading && !isDrawerOpen && (
           <>
             <CircleButton
-              onClick={() => setRegisterDialogOpen(true)}
+              // onClick={() => setRegisterDialogOpen(true)}
+              onClick={() => setIsDrawerOpen(true)}
               background={whiteOYC.orange}
               style={{
                 bottom: "calc(8vmin + 16vmin * sin(45deg) - 8vmin + 5vmin)",
@@ -180,7 +179,7 @@ const GeneratePage = ({
               プライベートで登録
             </CircleButton>
 
-            {registerDialogOpen && (
+            {/*{registerDialogOpen && (
               <div
                 style={{
                   position: "fixed",
@@ -189,7 +188,7 @@ const GeneratePage = ({
                   alignItems: "center",
                   justifyContent: "center",
                   zIndex: 1000,
-                  background: "rgba(0, 0, 0, 0.5)",
+                  background: "rgba(0, 0, 0, 0.9)",
                 }}
                 onClick={() => setRegisterDialogOpen(false)}
               >
@@ -210,35 +209,15 @@ const GeneratePage = ({
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div>
-                      <h2
-                        style={{
-                          textAlign: "center",
-                          textShadow: "0 0 10px rgba(255, 255, 255, 1.0)",
-                        }}
-                      >
-                        Privateで登録
-                      </h2>
                       <div
                         style={{ marginBottom: "3vmin", marginTop: "3vmin" }}
                       >
-                        <div
-                          style={{
-                            fontWeight: "bold",
-                            padding: "1vmin 0",
-                          }}
-                        >
-                          Poetry(暗号鍵)
-                        </div>
                         <div>
                           {isCopy && (
                             <div style={{ textAlign: "end" }}>Copy</div>
                           )}
                           <div
                             style={{
-                              // backgroundColor: "#ffff00",
-
-                              background:
-                                "repeating-radial-gradient(circle, #ffff00 0%, #fff 50%, #ffff00 100%)",
                               // background:
                               //   "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
                               display: "flex",
@@ -264,45 +243,9 @@ const GeneratePage = ({
 
                       <div
                         style={{
-                          marginTop: "5vmin",
-                          padding: "1vmin 0",
-                        }}
-                      >
-                        <p style={{ fontSize: "0.8rem" }}>
-                          ※Poetryはデータベースに保存されません.
-                          以下のリンクにて復元されます。
-                        </p>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "1vmin",
-                            opacity: 0.6,
-                          }}
-                        >
-                          <div>Loggin:</div>
-                          <div>www.poetry-loggin.net/loggin</div>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "1vmin",
-                            opacity: 0.6,
-                          }}
-                        >
-                          <div>Poetry:</div>
-                          <div>
-                            www.poetry-loggin.net/
-                            <span style={{ wordBreak: "break-all" }}>
-                              {hash}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
+                          display: "row",
                           justifyContent: "center",
-                          marginTop: "5vmin",
+                          gap: "",
                         }}
                       >
                         <button
@@ -310,8 +253,6 @@ const GeneratePage = ({
                           style={{
                             // alignItems: "center",
                             // backgroundColor: "#00ffff",
-                            background:
-                              "repeating-radial-gradient(circle, #00ffff 0%, #fff 50%, #00ffff 100%)",
                             border: "none",
                             borderRadius: "3px",
                             padding: "1vmin",
@@ -320,20 +261,85 @@ const GeneratePage = ({
                             cursor: "pointer",
                             fontSize: "0.8rem",
                             fontWeight: "bold",
-                            boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
+                            // boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
                           }}
                         >
                           作成
+                        </button>
+                        <button
+                          onClick={() =>
+                            setRegisterDialogOpen(!registerDialogOpen)
+                          }
+                          style={{
+                            // alignItems: "center",
+                            // backgroundColor: "#00ffff",
+                            border: "none",
+                            borderRadius: "3px",
+                            padding: "1vmin",
+                            width: "30vmin",
+                            color: "black",
+                            cursor: "pointer",
+                            fontSize: "0.8rem",
+                            fontWeight: "bold",
+                            // boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
+                          }}
+                        >
+                          キャンセル
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
+            )}*/}
           </>
         )}
-        {poetry && !poetryLoading && (
+        <Drawer isOpen={isDrawerOpen}>
+          <div>
+            {isCopy && (
+              <div style={{ textAlign: "end", color: "black" }}>Copy</div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                gap: "3vmin",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderRadius: "3px",
+                padding: " 0 3vmin",
+                wordBreak: "break-all",
+                color: "black",
+                // filter:
+                //   "drop-shadow(0 0 10px rgba(0, 0, 0, 0.3))",
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              <div className="dialog-poetry">{poetry}</div>
+              <CopyIcon
+                style={{ cursor: "pointer" }}
+                onClick={handleCopyPoetry}
+              />
+            </div>
+          </div>
+
+          <button
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: "10vmin",
+              height: "10vmin",
+              borderRadius: "0%",
+              border: "none",
+              background: "black",
+            }}
+          >
+            作成
+          </button>
+        </Drawer>
+        )
+        {poetry && !poetryLoading && !isDrawerOpen && (
           <CircleButton
             onClick={handleAddPublicPoetry}
             background={whiteOYC.cyan}
@@ -341,7 +347,6 @@ const GeneratePage = ({
               bottom:
                 "calc((8vmin + 16vmin * sin(45deg)) + 16vmin * sin(120deg) - 8vmin + 5vmin)",
               left: "calc((8vmin + 16vmin * cos(45deg)) + 16vmin * cos(120deg) - 8vmin + 5vmin)",
-              // opcity: isdialog ? 0.5 : 1,
               transform: "scale(0%)",
               animation: "ScaleButton 0.5s ease-in-out forwards",
             }}

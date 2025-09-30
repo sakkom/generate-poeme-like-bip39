@@ -210,25 +210,24 @@ button {
   font-size: 1rem;
 }
 
-/*.poetry {
-  font-size: 2.5rem;
-}*/
-
+.poetry {
+  font-size: 2rem;
+}
 .match {
   font-size: 1.5rem;
   color: mediumspringgreen;
   text-decoration: underline;
 }
 .dialog-poetry {
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 .dialog-circle {
   /*background-color: rgba(255, 255, 255, 0.8);*/
-  background: radial-gradient(circle, #ff6600 0%, #ffff00 50%, #00ffff 100%);
-  max-width: 110vmin;
-  max-height: 110vmin;
-  min-width: 110vmin;
-  min-height: 110vmin;
+  background: radial-gradient(circle, #ffaa66 0%, #ffff99 50%, #66ffff 100%);
+  max-width: 100vmin;
+  max-height: 70.7vmin;
+  min-width: 100vmin;
+  min-height: 70.7vmin;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
