@@ -239,6 +239,10 @@ button {
   position: relative;
 }
 
+.nav-font {
+  font-size: 1.5rem;
+}
+
 @media (max-width: 500px) {
   .poetry {
     font-size: 2rem;
@@ -250,6 +254,9 @@ button {
     font-size: 1rem;
   }
   .dialog-poetry {
+    font-size: 1rem;
+  }
+  .nav-font {
     font-size: 1rem;
   }
 }

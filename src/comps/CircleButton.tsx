@@ -1,19 +1,67 @@
+// // interface CircleButtonProps {
+// //   onClick?: () => void | Promise<void>;
+// //   style?: React.CSSProperties;
+// //   backgroundColor?: string;
+// //   children: React.ReactNode;
+// //   disabled?: boolean;
+// //   className?: string;
+// // }
+
+// // const CircleButton: React.FC<CircleButtonProps> = ({
+// //   onClick,
+// //   style = {},
+// //   backgroundColor = "#ffff00",
+// //   children,
+// //   disabled = false,
+// //   className = "button",
+// // }) => {
+// //   const baseStyle: React.CSSProperties = {
+// //     width: "16vmin",
+// //     height: "16vmin",
+// //     display: "flex",
+// //     alignItems: "center",
+// //     justifyContent: "center",
+// //     borderRadius: "50%",
+// //     cursor: disabled ? "default" : "pointer",
+// //     border: "none",
+// //     fontWeight: "bold",
+// //     position: "absolute",
+// //     textDecoration: "none",
+// //     color: "black",
+// //     backgroundColor,
+// //     ...style,
+// //   };
+
+// //   return (
+// //     <button
+// //       onClick={onClick}
+// //       disabled={disabled}
+// //       className={className}
+// //       style={baseStyle}
+// //     >
+// //       {children}
+// //     </button>
+// //   );
+// // };
+
+// // export default CircleButton;
+
 // interface CircleButtonProps {
-//   onClick?: () => void | Promise<void>;
-//   style?: React.CSSProperties;
-//   backgroundColor?: string;
 //   children: React.ReactNode;
+//   onClick?: () => void | Promise<void>;
 //   disabled?: boolean;
 //   className?: string;
+//   style?: React.CSSProperties;
+//   background?: string;
 // }
 
-// const CircleButton: React.FC<CircleButtonProps> = ({
-//   onClick,
-//   style = {},
-//   backgroundColor = "#ffff00",
+// export const CircleButton: React.FC<CircleButtonProps> = ({
 //   children,
+//   onClick,
 //   disabled = false,
 //   className = "button",
+//   style = {},
+//   background,
 // }) => {
 //   const baseStyle: React.CSSProperties = {
 //     width: "16vmin",
@@ -28,30 +76,41 @@
 //     position: "absolute",
 //     textDecoration: "none",
 //     color: "black",
-//     backgroundColor,
+//     boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
+//     background: `radial-gradient(circle, ${background} 0%, #fff 90%)`,
 //     ...style,
 //   };
 
 //   return (
-//     <button
-//       onClick={onClick}
-//       disabled={disabled}
-//       className={className}
-//       style={baseStyle}
+//     <div
+//       style={{
+//         position: "absolute",
+//         width: "16vmin",
+//         height: "16vmin",
+//         borderRadius: 0,
+//         border: "1px solid #ccc",
+//         ...style,
+//       }}
 //     >
-//       {children}
-//     </button>
+//       <button
+//         onClick={onClick}
+//         disabled={disabled}
+//         className={className}
+//         style={baseStyle}
+//       >
+//         {children}
+//       </button>
+//     </div>
 //   );
 // };
-
-// export default CircleButton;
 
 interface CircleButtonProps {
   children: React.ReactNode;
   onClick?: () => void | Promise<void>;
   disabled?: boolean;
   className?: string;
-  style?: React.CSSProperties;
+  containerStyle?: React.CSSProperties; // 追加
+  buttonStyle?: React.CSSProperties; // 追加
   background?: string;
 }
 
@@ -60,35 +119,45 @@ export const CircleButton: React.FC<CircleButtonProps> = ({
   onClick,
   disabled = false,
   className = "button",
-  style = {},
+  containerStyle = {},
+  buttonStyle = {},
   background,
 }) => {
-  const baseStyle: React.CSSProperties = {
-    width: "16vmin",
-    height: "16vmin",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "50%",
-    cursor: disabled ? "default" : "pointer",
-    border: "none",
-    fontWeight: "bold",
-    position: "absolute",
-    textDecoration: "none",
-    color: "black",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
-    background: `radial-gradient(circle, ${background} 0%, #fff 90%)`,
-    ...style,
-  };
-
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={className}
-      style={baseStyle}
+    <div
+      style={{
+        position: "absolute",
+        width: "16vmin",
+        height: "16vmin",
+        borderRadius: 0,
+        // border: "1px solid #000",
+        ...containerStyle,
+      }}
     >
-      {children}
-    </button>
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={className}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "50%",
+          cursor: disabled ? "default" : "pointer",
+          border: "none",
+          fontWeight: "bold",
+          textDecoration: "none",
+          color: "black",
+          boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
+          // background: `radial-gradient(circle, ${background} 0%, #fff 90%)`,
+          backgroundColor: "transparent",
+          ...buttonStyle,
+        }}
+      >
+        {children}
+      </button>
+    </div>
   );
 };

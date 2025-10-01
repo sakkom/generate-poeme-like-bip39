@@ -34,26 +34,47 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, children }) => {
   return (
     <div
       style={{
-        maxHeight: "10dvh",
-        width: "100dvw",
+        maxHeight: "60dvh",
+        maxWidth: "20dvw",
         position: "fixed",
-        top: 0,
-        left: 0,
-        transform: isOpen ? "translateY(0)" : "translateY(-100%)",
+        top: "20vmin",
+        right: 0,
+        transform: isOpen
+          ? "translateY(0)"
+          : "translateY(calc(-100% - 20vmin - 10vmin))",
         transition: "transform 0.3s steps(3, end)",
-        // backgroundColor: "rgba(255, 255, 255, 0.9)",
-        borderBottom: "2px dotted #fff",
-        padding: "1vmin 0",
+        // backgroundColor: "rgba(255, 255, 255, 0.5)",
         // background: `linear-gradient(to bottom,
         //   ${whiteOYC.orange} 0%,
         //   ${whiteOYC.yellow} ${middleStop}%,
         //   ${whiteOYC.cyan} 100%
         // )`,
         // borderRadius: " 0 0 5vmin 5vmin",
-        color: "white",
+        color: "black",
         zIndex: 100,
+        willChange: "transform",
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "-8vmin", // 左に伸ばす
+          right: 0,
+          height: 0,
+          borderBottom: "1px solid #000",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: "-8vmin",
+          width: 0,
+          borderLeft: "1px solid #000",
+        }}
+      />
       <div
         style={{
           display: "flex",

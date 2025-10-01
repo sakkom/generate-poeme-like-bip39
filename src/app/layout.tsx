@@ -6,6 +6,7 @@ import { Kaisei_Decol, Alumni_Sans } from "next/font/google";
 import "./globals.css";
 import { Background } from "@/comps/Background";
 import { WidthIcon } from "@radix-ui/react-icons";
+import { Nav } from "@/comps/Nav";
 
 const alumniSans = Alumni_Sans({
   weight: "400",
@@ -47,6 +48,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${kaiseiDecol.variable} ${alumniSans.variable}`}>
         <Background>
+          <Nav />
           <QueryClientProvider client={queryClient}>
             {children}
           </QueryClientProvider>

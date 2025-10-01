@@ -4,13 +4,10 @@ import { getPoetryHash } from "@/utils/util";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CopyIcon } from "@radix-ui/react-icons";
-import { CircleButton } from "@/comps/CircleButton";
-import { whiteOYC } from "@/comps/color";
 import { generatePoetry } from "@/utils/generate";
 import { savePrivatePoetry, savePublicPoetry } from "@/utils/database";
 import { Drawer } from "@/comps/Drawer";
 import { PoetryChar } from "@/comps/PoetryChar";
-import { Background } from "@/comps/Background";
 
 export default function Page() {
   const [poetry, setPoetry] = useState<string>();
@@ -94,22 +91,20 @@ interface GeneratePageProps {
   handleAddPublicPoetry: () => Promise<void>;
   poetryLoading: boolean;
 }
-
 const GeneratePage = ({
   poetry,
   hash,
   handleGeneratePoetry,
   handleAddPrivatePoetry,
   handleAddPublicPoetry,
-  poetryLoading, // 追加
+  poetryLoading,
 }: GeneratePageProps) => {
-  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [isCopy, setIsCopy] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
 
   const handleCopyPoetry = async () => {
     if (!poetry) return;
-
     try {
       await navigator.clipboard.writeText(poetry);
       setIsCopy(true);
@@ -118,6 +113,20 @@ const GeneratePage = ({
       console.error("Failed to copy:", error);
     }
   };
+
+  const showExtraButtons = poetry && !poetryLoading && !isDrawerOpen;
+
+  useEffect(() => {
+    if (showExtraButtons) {
+      // 次のフレームでトランジションを開始
+      requestAnimationFrame(() => {
+        setShowButtons(true);
+      });
+    } else {
+      setShowButtons(false);
+    }
+  }, [showExtraButtons]);
+
   return (
     <>
       {isDrawerOpen && (
@@ -125,13 +134,13 @@ const GeneratePage = ({
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
             zIndex: 99,
           }}
           onClick={() => setIsDrawerOpen(false)}
         />
       )}
-      <div style={{ width: "80%", height: "65dvh" }} className="center">
+      <div style={{ width: "80%", height: "80dvh" }} className="center">
         <div
           style={{
             writingMode: "vertical-rl",
@@ -145,216 +154,151 @@ const GeneratePage = ({
           ))}
         </div>
       </div>
-      <div>
-        <CircleButton
-          onClick={handleGeneratePoetry}
-          disabled={poetryLoading}
-          background={whiteOYC.yellow}
-          style={{
-            bottom: "5vmin",
-            left: "5vmin",
-            opacity: poetryLoading ? 0.5 : 1,
-            transform: "scale(0%)",
-            animation: "ScaleButton 1s ease-in-out forwards",
-          }}
-        >
-          {poetryLoading ? "生成中..." : "生成"}
-        </CircleButton>
-        {poetry && !poetryLoading && !isDrawerOpen && (
-          <>
-            <CircleButton
-              // onClick={() => setRegisterDialogOpen(true)}
-              onClick={() => setIsDrawerOpen(true)}
-              background={whiteOYC.orange}
-              style={{
-                bottom: "calc(8vmin + 16vmin * sin(45deg) - 8vmin + 5vmin)",
-                left: "calc(8vmin + 16vmin * cos(45deg) - 8vmin + 5vmin)",
-                opacity: registerDialogOpen ? 0.5 : 1,
-                // animation: "fadeIn 1s ease-in  forwards",
-                // transition: "opacity 0.3s ease-in-out",
-                transform: "scale(0%)",
-                animation: "ScaleButton 0.5s ease-in-out forwards",
-              }}
-            >
-              プライベートで登録
-            </CircleButton>
-
-            {/*{registerDialogOpen && (
-              <div
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 1000,
-                  background: "rgba(0, 0, 0, 0.9)",
-                }}
-                onClick={() => setRegisterDialogOpen(false)}
-              >
-                <div
-                  className="dialog-circle"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    transform: "scale(90%)",
-                    animation: "ScaleButton 0.5s ease-in-out forwards",
-                  }}
-                >
-                  <div
-                    className="dialog"
-                    style={{
-                      width: "90vmin",
-                      position: "relative",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div>
-                      <div
-                        style={{ marginBottom: "3vmin", marginTop: "3vmin" }}
-                      >
-                        <div>
-                          {isCopy && (
-                            <div style={{ textAlign: "end" }}>Copy</div>
-                          )}
-                          <div
-                            style={{
-                              // background:
-                              //   "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              borderRadius: "3px",
-                              padding: " 0 1vmin",
-                              wordBreak: "break-all",
-                              color: "black",
-                              // filter:
-                              //   "drop-shadow(0 0 10px rgba(0, 0, 0, 0.3))",
-                              boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
-                            }}
-                          >
-                            <div className="dialog-poetry">{poetry}</div>
-                            <CopyIcon
-                              style={{ cursor: "pointer" }}
-                              onClick={handleCopyPoetry}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "row",
-                          justifyContent: "center",
-                          gap: "",
-                        }}
-                      >
-                        <button
-                          onClick={handleAddPrivatePoetry}
-                          style={{
-                            // alignItems: "center",
-                            // backgroundColor: "#00ffff",
-                            border: "none",
-                            borderRadius: "3px",
-                            padding: "1vmin",
-                            width: "30vmin",
-                            color: "black",
-                            cursor: "pointer",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            // boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
-                          }}
-                        >
-                          作成
-                        </button>
-                        <button
-                          onClick={() =>
-                            setRegisterDialogOpen(!registerDialogOpen)
-                          }
-                          style={{
-                            // alignItems: "center",
-                            // backgroundColor: "#00ffff",
-                            border: "none",
-                            borderRadius: "3px",
-                            padding: "1vmin",
-                            width: "30vmin",
-                            color: "black",
-                            cursor: "pointer",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            // boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
-                          }}
-                        >
-                          キャンセル
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}*/}
-          </>
-        )}
-        <Drawer isOpen={isDrawerOpen}>
-          <div>
-            {isCopy && (
-              <div style={{ textAlign: "end", color: "black" }}>Copy</div>
-            )}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20vmin",
+          left: "0vmin",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
+        {/* 1行目: パブリック */}
+        {showExtraButtons && (
+          <div
+            style={{
+              display: "inline-block",
+              padding: "1vmin 3vmin",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              borderRight: "1px solid black",
+              transform: showButtons ? "translateX(0)" : "translateX(-100%)",
+              transition:
+                "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
+              opacity: showButtons ? 1 : 0,
+            }}
+            onClick={handleAddPublicPoetry}
+          >
             <div
               style={{
-                display: "flex",
-                gap: "3vmin",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderRadius: "3px",
-                padding: " 0 3vmin",
-                wordBreak: "break-all",
+                fontSize: "1rem",
+                fontWeight: "bold",
                 color: "black",
-                // filter:
-                //   "drop-shadow(0 0 10px rgba(0, 0, 0, 0.3))",
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
+                whiteSpace: "nowrap",
               }}
             >
-              <div className="dialog-poetry">{poetry}</div>
-              <CopyIcon
-                style={{ cursor: "pointer" }}
-                onClick={handleCopyPoetry}
-              />
+              パブリック
             </div>
           </div>
+        )}
+        {/* 2行目: プライベート */}
+        {showExtraButtons && (
+          <div
+            style={{
+              display: "inline-block",
+              borderBottom: "1px solid black",
+              borderTop: "1px solid black",
+              padding: "1vmin 3vmin",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              transform: showButtons ? "translateX(0)" : "translateX(-100%)",
+              transition:
+                "transform 0.3s ease-in-out 0.1s, opacity 0.3s ease-in-out 0.1s",
+              opacity: showButtons ? 1 : 0,
+            }}
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: "black",
+                whiteSpace: "nowrap",
+              }}
+            >
+              プライベート
+            </div>
+          </div>
+        )}
+        {/* 3行目: 生成 (常に表示・一番下) */}
+        <div
+          style={{
+            display: "inline-block",
+            borderRight: "1px solid black",
+            padding: "1vmin 3vmin",
+            backgroundColor: "transparent",
+            cursor: poetryLoading ? "default" : "pointer",
+            opacity: poetryLoading ? 0.5 : 1,
+          }}
+          onClick={poetryLoading ? undefined : handleGeneratePoetry}
+        >
+          <div
+            style={{
+              fontSize: "1rem",
+              fontWeight: "bold",
+              color: "black",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {poetryLoading ? "生成中..." : "生成"}
+          </div>
+        </div>
+      </div>
+      <Drawer isOpen={isDrawerOpen}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "5vmin",
+            height: "100%",
+            padding: "5vmin 3vmin",
+            position: "relative",
+          }}
+        >
+          <p style={{ fontWeight: "bold", padding: "0" }}>private</p>
+          <div
+            style={{
+              padding: "3vmin 3vmin",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              borderTop: "1px solid #000",
+              borderBottom: "1px solid #000",
+              gap: "1vmin",
+            }}
+          >
+            {isCopy && (
+              <span style={{ fontSize: "0.8rem", color: "green" }}>コピー</span>
+            )}
+            <CopyIcon
+              onClick={handleCopyPoetry}
+              style={{ color: "black", cursor: "pointer" }}
+            />
 
+            <div style={{ writingMode: "vertical-rl", color: "black" }}>
+              {poetry}
+            </div>
+          </div>
           <button
             style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: "10vmin",
-              height: "10vmin",
-              borderRadius: "0%",
+              width: "auto",
+              color: "black",
+              borderRadius: 0,
               border: "none",
-              background: "black",
+              fontWeight: "bold",
+              cursor: "pointer",
             }}
+            onClick={handleAddPrivatePoetry}
           >
-            作成
+            確定
           </button>
-        </Drawer>
-        )
-        {poetry && !poetryLoading && !isDrawerOpen && (
-          <CircleButton
-            onClick={handleAddPublicPoetry}
-            background={whiteOYC.cyan}
-            style={{
-              bottom:
-                "calc((8vmin + 16vmin * sin(45deg)) + 16vmin * sin(120deg) - 8vmin + 5vmin)",
-              left: "calc((8vmin + 16vmin * cos(45deg)) + 16vmin * cos(120deg) - 8vmin + 5vmin)",
-              transform: "scale(0%)",
-              animation: "ScaleButton 0.5s ease-in-out forwards",
-            }}
-          >
-            オープンで公開
-          </CircleButton>
-        )}
-      </div>
+        </div>
+      </Drawer>
     </>
   );
 };
@@ -555,15 +499,3 @@ const AfterGeneratedPage = ({ hash, poetry }: AfterGeneratedPageProps) => {
     </>
   );
 };
-
-// interface DialogProps {
-//   isOpen: boolean;
-//   hash: string;
-//   poetry: string;
-// }
-
-// const DialogDemo = ({ isOpen, hash, poetry }: DialogProps) => {
-//   return (
-
-//   );
-// };
