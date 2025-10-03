@@ -14,7 +14,7 @@ export const PoetryChar = ({ char, index }: PoetryCharProps) => {
           index % 2 == 0
             ? `eastSide 0.5s ease-in ${index * 0.05}s forwards`
             : `westSide 0.5s ease-in ${index * 0.05}s forwards`,
-        textShadow: "0 0 10px rgba(255, 255, 255, 1.0)",
+        // textShadow: "0 0 10px rgba(255, 255, 255, 1.0)",
         // zIndex: 100,
       }}
     >

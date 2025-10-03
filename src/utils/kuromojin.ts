@@ -55,7 +55,7 @@ export async function convertToKana(text: string): Promise<string> {
     const tokenizer = await setTokenizer();
 
     const tokens = tokenizer.tokenize(text) as Token[];
-    console.log("Tokens:", tokens);
+    // console.log("Tokens:", tokens);
 
     let result = "";
     for (const token of tokens) {

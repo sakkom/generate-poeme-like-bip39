@@ -20,7 +20,6 @@ export default function Page() {
       setPoetryHash(poetryHash);
       sessionStorage.setItem(poetryHash, inputPoetry);
     }
-    console.log(isMatch);
   };
 
   return (
@@ -31,7 +30,7 @@ export default function Page() {
       {hasPoetry && poetryHash && (
         <div
           style={{
-            width: "200px",
+            width: "250px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -40,13 +39,13 @@ export default function Page() {
             borderRadius: "1vmin",
           }}
         >
-          <Link href={`/login/${poetryHash}`}>
+          <Link href={`/${poetryHash}`}>
             <div
               style={{
                 color: "black",
               }}
             >
-              www.poetry-login.net/
+              /
               <span style={{ wordBreak: "break-all" }}>
                 {poetryHash?.split("").map((char, index) => {
                   const colors = ["#00ffff", "#ffff00", "#ff6600"];
