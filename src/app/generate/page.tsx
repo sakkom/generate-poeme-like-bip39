@@ -284,8 +284,31 @@ const GeneratePage = ({
           <div
             style={{
               display: "inline-block",
-              borderTop: "1px solid black",
               borderRight: "1px solid black",
+              borderTop: "1px solid black",
+              padding: "1vmin 3vmin",
+              backgroundColor:
+                dictMode == 1 ? "rgba(255,255,255,0.5)" : "transparent",
+              cursor: poetryLoading ? "default" : "pointer",
+              opacity: poetryLoading ? 0.5 : 1,
+            }}
+            onClick={() => setDictMode(1)}
+          >
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: "black",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Custom Vocabulary
+            </div>
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              borderTop: "1px solid black",
               padding: "1vmin 3vmin",
               backgroundColor:
                 dictMode == 0 ? "rgba(255,255,255,0.5)" : "transparent",
@@ -305,29 +328,6 @@ const GeneratePage = ({
               JMdict
             </div>
           </div>
-          <div
-            style={{
-              display: "inline-block",
-              borderTop: "1px solid black",
-              padding: "1vmin 3vmin",
-              backgroundColor:
-                dictMode == 1 ? "rgba(255,255,255,0.5)" : "transparent",
-              cursor: poetryLoading ? "default" : "pointer",
-              opacity: poetryLoading ? 0.5 : 1,
-            }}
-            onClick={() => setDictMode(1)}
-          >
-            <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: "bold",
-                color: "black",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Custom
-            </div>
-          </div>
         </div>
       </div>
 
@@ -338,14 +338,22 @@ const GeneratePage = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "justify-between",
             gap: "5vmin",
             height: "100%",
             padding: "5vmin 3vmin",
             position: "relative",
           }}
         >
-          <p style={{ fontWeight: "bold", padding: "0" }}>private</p>
+          <p
+            style={{
+              fontWeight: "bold",
+              padding: "0",
+              borderBottom: "1px solid #000",
+            }}
+          >
+            private
+          </p>
           <div
             style={{
               padding: "3vmin 3vmin",
@@ -354,13 +362,13 @@ const GeneratePage = ({
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-              borderTop: "1px solid #000",
-              borderBottom: "1px solid #000",
+              // borderTop: "1px solid #000",
+              // borderBottom: "1px solid #000",
               gap: "1vmin",
             }}
           >
             {isCopy && (
-              <span style={{ fontSize: "0.8rem", color: "green" }}>コピー</span>
+              <span style={{ fontSize: "0.8rem", color: "white" }}>コピー</span>
             )}
             <CopyIcon
               onClick={handleCopyPoetry}
@@ -396,11 +404,20 @@ const GeneratePage = ({
             justifyContent: "center",
             gap: "5vmin",
             height: "100%",
+            width: "100%",
             padding: "5vmin 3vmin",
             position: "relative",
           }}
         >
-          <p style={{ fontWeight: "bold", padding: "0" }}>public</p>
+          <p
+            style={{
+              fontWeight: "bold",
+              padding: "0",
+              borderBottom: "1px solid #000",
+            }}
+          >
+            public
+          </p>
           <div
             style={{
               padding: "3vmin 3vmin",
@@ -409,8 +426,8 @@ const GeneratePage = ({
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-              borderTop: "1px solid #000",
-              borderBottom: "1px solid #000",
+              // borderTop: "1px solid #000",
+              // borderBottom: "1px solid #000",
               gap: "1vmin",
             }}
           >
@@ -497,7 +514,7 @@ const AfterGeneratedPage = ({
           style={{ color: "black", cursor: "pointer" }}
         />
         {isCopy && (
-          <span style={{ fontSize: "0.8rem", color: "green" }}>コピー</span>
+          <span style={{ fontSize: "0.8rem", color: "white" }}>コピー</span>
         )}
       </div>
     </div>
