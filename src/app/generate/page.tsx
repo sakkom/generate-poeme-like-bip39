@@ -14,6 +14,8 @@ export default function Page() {
   const [hash, setHash] = useState<string>();
   const [isDone, setIsDone] = useState<boolean>(false);
   const [poetryLoading, setPoetryLoading] = useState<boolean>(false);
+  const [isPublic, setIsPublic] = useState<boolean>(false);
+  const [generateError, setGenerateError] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -29,6 +31,7 @@ export default function Page() {
     try {
       const createdHash = await savePrivatePoetry(hash);
       if (createdHash) {
+        setIsPublic(false); // privateに設定
         setIsDone(true);
       }
     } catch (error) {
@@ -42,6 +45,7 @@ export default function Page() {
     try {
       const createdHash = await savePublicPoetry(hash, poetry);
       if (createdHash) {
+        setIsPublic(true); // publicに設定
         setIsDone(true);
       }
     } catch (error) {
@@ -49,15 +53,21 @@ export default function Page() {
     }
   };
 
-  const handleGeneratePoetry = async () => {
+  const handleGeneratePoetry = async (dictMode: number) => {
     setPoetryLoading(true);
-    try {
-      const poetry = await generatePoetry();
-      if (!poetry || poetry.length === 0) return;
+    setGenerateError("");
 
-      setPoetry(poetry);
+    try {
+      const result = await generatePoetry(dictMode);
+
+      if (result.success === false) {
+        setGenerateError(result.error);
+        return;
+      }
+
+      setPoetry(result.poetry);
     } catch (error) {
-      console.error(error);
+      setGenerateError("予期しないエラーが発生しました");
     } finally {
       setPoetryLoading(false);
     }
@@ -74,9 +84,10 @@ export default function Page() {
             handleAddPrivatePoetry={handleAddPrivatePoetry}
             handleAddPublicPoetry={handleAddPublicPoetry}
             poetryLoading={poetryLoading}
+            generateError={generateError}
           />
         ) : (
-          <AfterGeneratedPage hash={hash} poetry={poetry} />
+          <AfterGeneratedPage hash={hash} poetry={poetry} isPublic={isPublic} />
         )}
       </div>
     </>
@@ -86,10 +97,11 @@ export default function Page() {
 interface GeneratePageProps {
   poetry?: string;
   hash?: string;
-  handleGeneratePoetry: () => Promise<void>;
+  handleGeneratePoetry: (dictMode: number) => Promise<void>;
   handleAddPrivatePoetry: () => Promise<void>;
   handleAddPublicPoetry: () => Promise<void>;
   poetryLoading: boolean;
+  generateError: string;
 }
 const GeneratePage = ({
   poetry,
@@ -98,10 +110,13 @@ const GeneratePage = ({
   handleAddPrivatePoetry,
   handleAddPublicPoetry,
   poetryLoading,
+  generateError,
 }: GeneratePageProps) => {
   const [isCopy, setIsCopy] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isPublicDrawerOpen, setIsPublicDrawerOpen] = useState(false); // 追加
   const [showButtons, setShowButtons] = useState(false);
+  const [dictMode, setDictMode] = useState<number>(0);
 
   const handleCopyPoetry = async () => {
     if (!poetry) return;
@@ -114,11 +129,11 @@ const GeneratePage = ({
     }
   };
 
-  const showExtraButtons = poetry && !poetryLoading && !isDrawerOpen;
+  const showExtraButtons =
+    poetry && !poetryLoading && !isDrawerOpen && !isPublicDrawerOpen;
 
   useEffect(() => {
     if (showExtraButtons) {
-      // 次のフレームでトランジションを開始
       requestAnimationFrame(() => {
         setShowButtons(true);
       });
@@ -140,6 +155,17 @@ const GeneratePage = ({
           onClick={() => setIsDrawerOpen(false)}
         />
       )}
+      {isPublicDrawerOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            zIndex: 99,
+          }}
+          onClick={() => setIsPublicDrawerOpen(false)}
+        />
+      )}
       <div style={{ width: "80%", height: "80dvh" }} className="center">
         <div
           style={{
@@ -149,9 +175,17 @@ const GeneratePage = ({
             flexWrap: "wrap",
           }}
         >
-          {poetry?.split("").map((char, i) => (
-            <PoetryChar key={`${poetry}-${i}`} char={char} index={i} />
-          ))}
+          {generateError ? (
+            <div style={{ color: "black", fontWeight: "bold" }}>
+              {generateError}
+            </div>
+          ) : (
+            poetry
+              ?.split("")
+              .map((char, i) => (
+                <PoetryChar key={`${poetry}-${i}`} char={char} index={i} />
+              ))
+          )}
         </div>
       </div>
       <div
@@ -178,7 +212,7 @@ const GeneratePage = ({
                 "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
               opacity: showButtons ? 1 : 0,
             }}
-            onClick={handleAddPublicPoetry}
+            onClick={() => setIsPublicDrawerOpen(true)} // 変更
           >
             <div
               style={{
@@ -231,7 +265,9 @@ const GeneratePage = ({
             cursor: poetryLoading ? "default" : "pointer",
             opacity: poetryLoading ? 0.5 : 1,
           }}
-          onClick={poetryLoading ? undefined : handleGeneratePoetry}
+          onClick={
+            poetryLoading ? undefined : () => handleGeneratePoetry(dictMode)
+          }
         >
           <div
             style={{
@@ -244,7 +280,58 @@ const GeneratePage = ({
             {poetryLoading ? "生成中..." : "生成"}
           </div>
         </div>
+        <div style={{ display: "flex" }}>
+          <div
+            style={{
+              display: "inline-block",
+              borderTop: "1px solid black",
+              borderRight: "1px solid black",
+              padding: "1vmin 3vmin",
+              backgroundColor:
+                dictMode == 0 ? "rgba(255,255,255,0.5)" : "transparent",
+              cursor: poetryLoading ? "default" : "pointer",
+              opacity: poetryLoading ? 0.5 : 1,
+            }}
+            onClick={() => setDictMode(0)}
+          >
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: "black",
+                whiteSpace: "nowrap",
+              }}
+            >
+              JMdict
+            </div>
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              borderTop: "1px solid black",
+              padding: "1vmin 3vmin",
+              backgroundColor:
+                dictMode == 1 ? "rgba(255,255,255,0.5)" : "transparent",
+              cursor: poetryLoading ? "default" : "pointer",
+              opacity: poetryLoading ? 0.5 : 1,
+            }}
+            onClick={() => setDictMode(1)}
+          >
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: "black",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Custom
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Private Drawer */}
       <Drawer isOpen={isDrawerOpen}>
         <div
           style={{
@@ -279,7 +366,6 @@ const GeneratePage = ({
               onClick={handleCopyPoetry}
               style={{ color: "black", cursor: "pointer" }}
             />
-
             <div style={{ writingMode: "vertical-rl", color: "black" }}>
               {poetry}
             </div>
@@ -299,6 +385,61 @@ const GeneratePage = ({
           </button>
         </div>
       </Drawer>
+
+      {/* Public Drawer */}
+      <Drawer isOpen={isPublicDrawerOpen}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "5vmin",
+            height: "100%",
+            padding: "5vmin 3vmin",
+            position: "relative",
+          }}
+        >
+          <p style={{ fontWeight: "bold", padding: "0" }}>public</p>
+          <div
+            style={{
+              padding: "3vmin 3vmin",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              borderTop: "1px solid #000",
+              borderBottom: "1px solid #000",
+              gap: "1vmin",
+            }}
+          >
+            {isCopy && (
+              <span style={{ fontSize: "0.8rem", color: "green" }}>コピー</span>
+            )}
+            <CopyIcon
+              onClick={handleCopyPoetry}
+              style={{ color: "black", cursor: "pointer" }}
+            />
+            <div style={{ writingMode: "vertical-rl", color: "black" }}>
+              {poetry}
+            </div>
+          </div>
+          <button
+            style={{
+              width: "auto",
+              color: "black",
+              borderRadius: 0,
+              border: "none",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+            onClick={handleAddPublicPoetry}
+          >
+            確定
+          </button>
+        </div>
+      </Drawer>
     </>
   );
 };
@@ -306,14 +447,26 @@ const GeneratePage = ({
 interface AfterGeneratedPageProps {
   hash?: string;
   poetry?: string;
+  isPublic?: boolean; // 追加
 }
 
-const AfterGeneratedPage = ({ hash, poetry }: AfterGeneratedPageProps) => {
+const AfterGeneratedPage = ({
+  hash,
+  poetry,
+  isPublic,
+}: AfterGeneratedPageProps) => {
   const [isCopy, setIsCopy] = useState(false);
+  const [showCenterNav, setShowCenterNav] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowCenterNav(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCopyPoetry = async () => {
     if (!poetry) return;
-
     try {
       await navigator.clipboard.writeText(poetry);
       setIsCopy(true);
@@ -324,178 +477,29 @@ const AfterGeneratedPage = ({ hash, poetry }: AfterGeneratedPageProps) => {
   };
 
   return (
-    <>
+    <div>
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          background:
-            "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
+          color: "black",
+          fontSize: "1.2rem",
+          lineHeight: "1.6",
+          flex: 1,
+          textAlign: "center",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          zIndex: 1000,
+          gap: "2vmin",
         }}
       >
-        <div onClick={(e) => e.stopPropagation()}>
-          <div
-            className="dialog"
-            style={{
-              background: "transparent",
-              width: "90vmin",
-              position: "relative",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "none",
-                fontSize: "5vmin",
-                cursor: "pointer",
-                width: "5vmin",
-                height: "5vmin",
-                textAlign: "center",
-              }}
-            ></button>
-            <div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: "black",
-                }}
-              >
-                <Link
-                  href={"/visit"}
-                  style={{
-                    background:
-                      "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "black",
-                    width: "18vmin",
-                    height: "18vmin",
-                    borderRadius: "50%",
-                    margin: "0 1vmin",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ログイン
-                </Link>
-                または
-                <Link
-                  href={"/"}
-                  style={{
-                    background:
-                      "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "black",
-                    width: "20vmin",
-                    height: "20vmin",
-                    borderRadius: "50%",
-                    margin: "0 1vmin",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ホーム
-                </Link>
-                に戻る
-              </div>
-              <div style={{ marginTop: "5vmin" }}>
-                {isCopy && (
-                  <div style={{ color: "black", textAlign: "end" }}>copy</div>
-                )}
-                <div>
-                  <div
-                    style={{
-                      // backgroundColor: "#ffff00",
-                      background:
-                        "radial-gradient(circle,  #ff6600 0%, #ffff00 50%, #00ffff 100%)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: " 0 1vmin",
-                      wordBreak: "break-all",
-                      color: "black",
-                    }}
-                  >
-                    <div className="dialog-poetry">{poetry}</div>
-                    <CopyIcon
-                      style={{ cursor: "pointer" }}
-                      onClick={handleCopyPoetry}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  // borderTop: "1vmin dotted #ff6600",
-                  // borderBottom: "1vmin dotted #ff6600",
-                  padding: "1vmin 0",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "1vmin",
-                  }}
-                >
-                  <div>
-                    <span style={{ wordBreak: "break-all" }}>
-                      {hash?.split("").map((char, index) => {
-                        const colors = ["#00ffff", "#ffff00", "#ff6600"];
-                        return (
-                          <span
-                            key={index}
-                            style={{ color: colors[index % 3] }}
-                          >
-                            {char}
-                          </span>
-                        );
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {/*<div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: "20vmin",
-                }}
-              >
-                <button
-                  style={{
-                    // alignItems: "center",
-                    backgroundColor: "black",
-                    border: "none",
-                    borderRadius: "3px",
-                    padding: "1vmin",
-                    width: "30vmin",
-                    color: "white",
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                  }}
-                >
-                  作成
-                </button>
-              </div>*/}
-            </div>
-          </div>
-        </div>
+        <span>{poetry}</span>
+        <CopyIcon
+          onClick={handleCopyPoetry}
+          style={{ color: "black", cursor: "pointer" }}
+        />
+        {isCopy && (
+          <span style={{ fontSize: "0.8rem", color: "green" }}>コピー</span>
+        )}
       </div>
-    </>
+    </div>
   );
 };

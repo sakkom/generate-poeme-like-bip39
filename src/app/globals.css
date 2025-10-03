@@ -196,6 +196,15 @@ button {
   }
 }
 
+@keyframes buttonFadeIn {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes ScaleButton {
   to {
     transform: scale(100%);

@@ -47,7 +47,7 @@ export const Nav = () => {
         </div>
       </Link>
 
-      <Link href={`/visit`}>
+      <Link href={`/login`}>
         <div
           style={{
             position: "absolute",
@@ -65,11 +65,11 @@ export const Nav = () => {
             paddingRight: "1vmin",
           }}
         >
-          Loggin
+          Login
         </div>
       </Link>
 
-      <Link href={`/create`}>
+      <Link href={`/public`}>
         <div
           style={{
             position: "absolute",
@@ -87,11 +87,11 @@ export const Nav = () => {
             paddingRight: "1vmin",
           }}
         >
-          Opened
+          Public
         </div>
       </Link>
 
-      <Link href={`/create`}>
+      <Link href={`/vocabulary`}>
         <div
           style={{
             position: "absolute",

@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db";
 import {
-  hashsTable,
+  hashTable,
   dictionaryTable,
   SelectDictionary,
   InsertCustomDictionary,
@@ -15,8 +15,8 @@ export async function hasHash(hash: string) {
   try {
     const results = await db
       .select()
-      .from(hashsTable)
-      .where(eq(hashsTable.hash, hash));
+      .from(hashTable)
+      .where(eq(hashTable.hash, hash));
     return results.length > 0;
   } catch (error) {
     throw new Error(`同一ハッシュセレクト中のエラー ${error}`);
@@ -24,16 +24,35 @@ export async function hasHash(hash: string) {
 }
 
 /*生成用------------------------------------------------------------------------------------------------------ */
+
+type WordResult = {
+  id: number;
+  createdAt: Date;
+  kana: string;
+  kanji: string;
+  syllables: number;
+  meaning?: string;
+};
 export async function getWordsByPattern(
+  dictMode: number,
   pattern: number[],
-): Promise<SelectDictionary[]> {
+): Promise<WordResult[]> {
   try {
-    return await db
-      .select()
-      .from(dictionaryTable)
-      .where(inArray(dictionaryTable.syllables, pattern))
-      .orderBy(sql`RANDOM()`)
-      .limit(200);
+    if (dictMode === 0) {
+      return await db
+        .select()
+        .from(dictionaryTable)
+        .where(inArray(dictionaryTable.syllables, pattern))
+        .orderBy(sql`RANDOM()`)
+        .limit(200);
+    } else {
+      return await db
+        .select()
+        .from(customDictionaryTable)
+        .where(inArray(customDictionaryTable.syllables, pattern))
+        .orderBy(sql`RANDOM()`)
+        .limit(200);
+    }
   } catch (err) {
     throw new Error("ランダムワード取得エラー", err);
   }
@@ -43,7 +62,7 @@ export async function savePrivatePoetry(hash: string) {
   if (await hasHash(hash)) throw new Error("この詩はすでにあります");
   try {
     const [result] = await db
-      .insert(hashsTable)
+      .insert(hashTable)
       .values({
         hash,
       })
@@ -58,7 +77,7 @@ export async function savePublicPoetry(hash: string, poetry: string) {
   if (await hasHash(hash)) throw new Error("この詩はすでにあります");
   try {
     const [result] = await db
-      .insert(hashsTable)
+      .insert(hashTable)
       .values({
         hash,
         poetry,
@@ -77,27 +96,43 @@ export async function getPoetriesWindow(
   windowSize: number = 50,
 ) {
   const results = await db
-    .select({ poetry: hashsTable.poetry, hash: hashsTable.hash })
-    .from(hashsTable)
-    .where(eq(hashsTable.opened, true))
-    .orderBy(asc(hashsTable.id))
+    .select({ poetry: hashTable.poetry, hash: hashTable.hash })
+    .from(hashTable)
+    .where(eq(hashTable.opened, true))
+    .orderBy(asc(hashTable.id))
     .limit(windowSize)
     .offset(startIndex);
   return { poetries: results };
 }
 
 /*みんなの辞書------------------------------------------------------------------------------------------------------ */
-export async function saveCustomWord(kanji: string, kana: string) {
-  const syllables = await countMora(kana);
+export async function hasCustomWord(kanji: string) {
   try {
-    const [result] = await db
-      .insert(customDictionaryTable)
-      .values({ kanji, kana, syllables })
-      .returning();
-    console.log("save custom word", result);
+    const results = await db
+      .select()
+      .from(customDictionaryTable)
+      .where(eq(customDictionaryTable.kanji, kanji));
+    return results.length > 0;
+  } catch (error) {
+    throw new Error(`同一ハッシュセレクト中のエラー ${error}`);
+  }
+}
+export async function saveCustomWord(
+  kanji: string,
+  kana: string,
+  syllables: number,
+) {
+  try {
+    const exsits = await hasCustomWord(kanji);
+    if (!exsits) {
+      await db
+        .insert(customDictionaryTable)
+        .values({ kanji, kana, syllables })
+        .returning();
+    }
   } catch (err) {
     throw new Error("Custom dictionary save error", err);
   }
 }
 
-saveCustomWord("kickout", "きっくあうと");
+// saveCustomWord("kickout", "きっくあうと");

@@ -13,13 +13,14 @@ export default function Page() {
     if (!inputPoetry) return;
 
     const poetryHash = await getPoetryHash(inputPoetry);
-    const isMatch = await hasHash(inputPoetry);
+    const isMatch = await hasHash(poetryHash);
 
     if (isMatch) {
       setHasPoetry(isMatch);
       setPoetryHash(poetryHash);
       sessionStorage.setItem(poetryHash, inputPoetry);
     }
+    console.log(isMatch);
   };
 
   return (
@@ -39,13 +40,13 @@ export default function Page() {
             borderRadius: "1vmin",
           }}
         >
-          <Link href={`/visit/${poetryHash}`}>
+          <Link href={`/login/${poetryHash}`}>
             <div
               style={{
                 color: "black",
               }}
             >
-              www.poetry-loggin.net/
+              www.poetry-login.net/
               <span style={{ wordBreak: "break-all" }}>
                 {poetryHash?.split("").map((char, index) => {
                   const colors = ["#00ffff", "#ffff00", "#ff6600"];
@@ -62,9 +63,10 @@ export default function Page() {
       )}
       <GridInput
         maxChars={20}
-        lineLength={5}
-        columnCount={4}
+        lineLength={4}
+        columnCount={5}
         onUpdateContent={handleContentUpdate}
+        isDictionary={false}
       />
     </div>
   );

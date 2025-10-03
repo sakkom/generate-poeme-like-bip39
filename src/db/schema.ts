@@ -8,7 +8,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 
-export const hashsTable = pgTable("hashs_table", {
+export const hashTable = pgTable("hash_table", {
   id: serial("id").primaryKey(),
   hash: text("hash").notNull(),
   opened: boolean("opened").default(false).notNull(),

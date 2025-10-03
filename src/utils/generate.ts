@@ -1,7 +1,8 @@
 "use server";
-import { JMdicWord } from "../scripts/jmdic";
+// import { JMdicWord } from "../scripts/jmdic";
 import { SelectDictionary } from "@/db/schema";
-import { getWordsByPattern } from "./database";
+import { getWordsByPattern, hasHash } from "./database";
+import { getPoetryHash } from "./util";
 
 function generate17Pattern(): number[] {
   // const wordCount = Math.random() < 0.6 ? 2 : 3;
@@ -28,45 +29,57 @@ function generate17Pattern(): number[] {
   return patterns[Math.floor(Math.random() * patterns.length)];
 }
 
-export async function generatePoetry(): Promise<string> {
-  const pattern = generate17Pattern();
-  const words: SelectDictionary[] = await getWordsByPattern(pattern);
+// generate.ts
+export async function generatePoetry(
+  dictMode: number,
+): Promise<
+  { success: true; poetry: string } | { success: false; error: string }
+> {
+  const MAX_RETRIES = 5;
 
-  const groups = new Map();
-  words.forEach((w) => {
-    if (!groups.has(w.syllables)) groups.set(w.syllables, []);
-    groups.get(w.syllables).push(w);
-  });
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const pattern = generate17Pattern();
+    const words: any[] = await getWordsByPattern(dictMode, pattern);
+    const groups = new Map();
 
-  const result = [];
-  let charCount = 0;
-
-  for (const syllables of pattern) {
-    const candidates = groups.get(syllables) || [];
-    const valid = candidates.filter((w) => {
-      const text = w.kanji || w.kana;
-      return (
-        charCount + text.length <= 20 &&
-        (!w.kanji || w.kanji.length > 1) &&
-        !result.some((used) => used.kana === w.kana)
-      );
+    words.forEach((w) => {
+      if (!groups.has(w.syllables)) groups.set(w.syllables, []);
+      groups.get(w.syllables).push(w);
     });
 
-    if (valid.length > 0) {
-      const selected = valid[Math.floor(Math.random() * valid.length)];
-      result.push(selected);
-      charCount += (selected.kanji || selected.kana).length;
-    } else {
-      console.log(
-        `No valid words found for ${syllables} syllables, retrying...`,
-      );
+    const result = [];
+    let charCount = 0;
+
+    for (const syllables of pattern) {
+      const candidates = groups.get(syllables) || [];
+      const valid = candidates.filter((w) => {
+        const text = w.kanji || w.kana;
+        return (
+          charCount + text.length <= 20 &&
+          (!w.kanji || w.kanji.length > 1) &&
+          !result.some((used) => used.kana === w.kana)
+        );
+      });
+
+      if (valid.length > 0) {
+        const selected = valid[Math.floor(Math.random() * valid.length)];
+        result.push(selected);
+        charCount += (selected.kanji || selected.kana).length;
+      }
+    }
+
+    if (result.length === pattern.length) {
+      const poetry = result.map((w) => w.kanji || w.kana).join("");
+      const hash = await getPoetryHash(poetry);
+
+      if (await hasHash(hash)) {
+        // console.log("詩が重複しています。再生成します...");
+        continue;
+      }
+
+      return { success: true, poetry };
     }
   }
-  // console.log(
-  //   `Generated pattern: [${pattern.join(", ")}] (total: ${pattern.reduce((a, b) => a + b, 0)})`,
-  // );
-  // 文字列として返す
-  return result.length === pattern.length
-    ? result.map((w) => w.kanji || w.kana).join("")
-    : generatePoetry();
+
+  return { success: false, error: "辞書が枯渇しております。" };
 }

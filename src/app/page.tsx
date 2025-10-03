@@ -5,9 +5,9 @@ export default function Page() {
   const items = [
     { text: "About", href: "/about" },
     { text: "Generate", href: "/generate" },
-    { text: "Login", href: "/visit" },
-    { text: "opened", href: "/open" },
-    { text: "vocabulary", href: "/create" },
+    { text: "Login", href: "/login" },
+    { text: "public", href: "/public" },
+    { text: "vocabulary", href: "/vocabulary" },
   ];
 
   return (

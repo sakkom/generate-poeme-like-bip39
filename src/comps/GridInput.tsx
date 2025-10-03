@@ -1,6 +1,6 @@
 "use client";
 import { whiteOYC } from "@/comps/color";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface GridInputProps {
   maxChars?: number;
@@ -8,6 +8,7 @@ interface GridInputProps {
   columnCount?: number;
   cellSize?: number;
   onUpdateContent?: (text: string) => void;
+  isDictionary: boolean;
 }
 
 interface CursorPos {
@@ -21,11 +22,13 @@ export default function GridInput({
   columnCount = 4,
   cellSize = 50,
   onUpdateContent,
+  isDictionary = false,
 }: GridInputProps) {
   const [content, setContent] = useState<string[]>(Array(maxChars).fill(""));
   const [cursor, setCursor] = useState<CursorPos>({ xPos: 0, yPos: 0 });
   const [isIme, setIsIme] = useState(false);
   const [imeText, setImeText] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // const actualCharCount = content.filter((char) => char !== "").length;
   const positionToIndex = (xPos: number, yPos: number) =>
@@ -42,8 +45,9 @@ export default function GridInput({
   };
 
   const clearInput = () => {
-    const input = document.querySelector("input") as HTMLInputElement;
-    if (input) input.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = ""; // ← 修正
+    }
   };
 
   const handleBackSpace = () => {
@@ -53,6 +57,7 @@ export default function GridInput({
       const newContent = [...content];
       newContent[currentIndex] = "";
       updateContent(newContent);
+      clearInput();
       return;
     }
     // 前の位置に移動して削除
@@ -62,6 +67,7 @@ export default function GridInput({
       newContent[newIndex] = "";
       updateContent(newContent);
       setCursor(indexToPosition(newIndex));
+      clearInput();
     }
   };
 
@@ -74,7 +80,7 @@ export default function GridInput({
     updateContent(newContent);
 
     const nextIndex = currentIndex + 1;
-    if (nextIndex <= maxChars) {
+    if (nextIndex < maxChars) {
       setCursor(indexToPosition(nextIndex));
     }
   };
@@ -89,8 +95,13 @@ export default function GridInput({
         clearInput();
         return;
       }
-      if (value[value.length - 1]) {
-        addCharacter(value[value.length - 1]);
+      const lastChar = value[value.length - 1];
+      // 漢字・ひらがな・カタカナのみ許可
+      if (
+        lastChar &&
+        /[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(lastChar)
+      ) {
+        addCharacter(lastChar);
       }
       clearInput();
     }
@@ -110,12 +121,16 @@ export default function GridInput({
 
       for (const char of value) {
         if (nextIndex >= maxChars) break;
-        newContent[nextIndex] = char;
-        nextIndex++;
+        // 漢字・ひらがな・カタカナのみ許可
+        if (/[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
+          newContent[nextIndex] = char;
+          nextIndex++;
+        }
       }
 
       updateContent(newContent);
-      setCursor(indexToPosition(Math.min(nextIndex, maxChars)));
+      //-1でbackspace処理で出現する要素を訂正
+      setCursor(indexToPosition(Math.min(nextIndex, maxChars - 1)));
     }
 
     setIsIme(false);
@@ -142,8 +157,11 @@ export default function GridInput({
 
     for (const char of text) {
       if (nextIndex >= maxChars) break;
-      newContent[nextIndex] = char;
-      nextIndex++;
+      // 漢字・ひらがな・カタカナのみ許可（空白も除外）
+      if (/[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
+        newContent[nextIndex] = char;
+        nextIndex++;
+      }
     }
 
     updateContent(newContent);
@@ -161,111 +179,129 @@ export default function GridInput({
   return (
     <div
       style={{
-        position: "relative",
-        width: `${cellSize * columnCount}px`,
-        height: `${cellSize * lineLength}px`,
-        backgroundColor: "transparent",
+        padding: "3vmin",
       }}
     >
-      {Array.from({ length: lineLength * columnCount }).map((_, index) => {
-        const yPos = index % lineLength;
-        const xPos = Math.floor(index / lineLength);
-        const cellIndex = positionToIndex(xPos, yPos);
-        const hasChar = content[cellIndex] !== "";
-        const isImeChar =
-          isIme &&
-          cellIndex >= getCurrentIndex() &&
-          cellIndex < getCurrentIndex() + imeText.length;
-        const whiteOYCarray = [whiteOYC.orange, whiteOYC.yellow, whiteOYC.cyan];
-        const dynamicColor = hasChar
-          ? "transparent"
-          : isImeChar
-            ? "rgba(255,255,255, 0.2)"
-            : whiteOYCarray[index % 3];
-        console.log(`dynamicColor: ${dynamicColor}`);
-        return (
-          <div
-            key={index}
-            className={cellIndex === 0 && !hasChar ? "cell-bounce" : ""}
-            style={{
-              position: "absolute",
-              top: `${yPos * cellSize}px`,
-              right: `${xPos * cellSize}px`,
-              width: `${cellSize}px`,
-              height: `${cellSize}px`,
-              borderRadius: hasChar ? "0px" : "50%",
-              background: hasChar
-                ? "transparent"
-                : `radial-gradient(circle, ${dynamicColor} 0%, #fff 90%)`,
-              boxShadow: hasChar
-                ? "none"
-                : "0px 0px 20px rgba(255, 255, 255, 0.8)",
-            }}
-          />
-        );
-      })}
-
-      {displayContent.map((char, index) => {
-        if (!char) return null;
-        const pos = indexToPosition(index);
-        const isConfirmedChar = content[index] !== "";
-
-        return (
-          <div
-            key={index}
-            style={{
-              position: "absolute",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              top: `${pos.yPos * cellSize}px`,
-              right: `${pos.xPos * cellSize}px`,
-              width: `${cellSize}px`,
-              height: `${cellSize}px`,
-              fontSize: `${cellSize * 0.6}px`,
-              writingMode: "vertical-rl",
-              zIndex: 10,
-              color: "black",
-              fontWeight: "bold",
-              background: "transparent",
-              textShadow: "0px 0px 10px rgba(255, 255, 255, 1.0)",
-            }}
-          >
-            {char}
-          </div>
-        );
-      })}
-
-      <input
+      <div
         style={{
-          position: "absolute",
-          top: `${cursor.yPos * cellSize}px`,
-          right: `${cursor.xPos * cellSize}px`,
-          width: `${cellSize}px`,
-          height: `${cellSize}px`,
-          fontSize: `${cellSize * 0.6}px`,
-          textAlign: "center",
-          border: "none",
-          borderRadius: "50%",
+          position: "relative",
+          width: `${cellSize * columnCount}px`,
+          height: `${cellSize * lineLength}px`,
           backgroundColor: "transparent",
-          writingMode: "vertical-rl",
-          transform: "scale(1.05)",
-          transformOrigin: "center",
-          zIndex: 20,
-          outline: "none",
-          color: "transparent",
-          caretColor: "transparent",
-          opacity: getCurrentIndex() >= maxChars ? 0.5 : 1,
-          // boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.8)",
         }}
-        onPaste={handlePaste}
-        onChange={handleChange}
-        onCompositionStart={handleCompositionStart}
-        onCompositionEnd={handleCompositionEnd}
-        onKeyDown={handleKeyDown}
-        type="text"
-        autoFocus
-      />
+      >
+        {Array.from({ length: lineLength * columnCount }).map((_, index) => {
+          const yPos = index % lineLength;
+          const xPos = Math.floor(index / lineLength);
+          const cellIndex = positionToIndex(xPos, yPos);
+          const hasChar = content[cellIndex] !== "";
+          const isImeChar =
+            isIme &&
+            cellIndex >= getCurrentIndex() &&
+            cellIndex < getCurrentIndex() + imeText.length;
+          const whiteOYCarray = [
+            whiteOYC.orange,
+            whiteOYC.yellow,
+            whiteOYC.cyan,
+          ];
+          const dynamicColor = hasChar
+            ? "transparent"
+            : isImeChar
+              ? "rgba(255,255,255, 0.2)"
+              : isDictionary
+                ? "transparent"
+                : whiteOYCarray[index % 3];
+          const customBorder = hasChar
+            ? "none"
+            : isDictionary
+              ? "1px solid black"
+              : "none";
+          return (
+            <div
+              key={index}
+              className={cellIndex === 0 && !hasChar ? "cell-bounce" : ""}
+              style={{
+                position: "absolute",
+                top: `${yPos * cellSize}px`,
+                right: `${xPos * cellSize}px`,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                borderRadius: hasChar ? "0px" : "50%",
+                background: hasChar
+                  ? "transparent"
+                  : `radial-gradient(circle, ${dynamicColor} 0%, #fff 90%)`,
+                boxShadow: hasChar
+                  ? "none"
+                  : "0px 0px 20px rgba(255, 255, 255, 0.8)",
+                border: customBorder,
+              }}
+            />
+          );
+        })}
+
+        {displayContent.map((char, index) => {
+          if (!char) return null;
+          const pos = indexToPosition(index);
+          const isConfirmedChar = content[index] !== "";
+
+          return (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                top: `${pos.yPos * cellSize}px`,
+                right: `${pos.xPos * cellSize}px`,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                fontSize: `${cellSize * 0.6}px`,
+                writingMode: "vertical-rl",
+                zIndex: 10,
+                color: "black",
+                fontWeight: "bold",
+                background: "transparent",
+                textShadow: "0px 0px 10px rgba(255, 255, 255, 1.0)",
+              }}
+            >
+              {char}
+            </div>
+          );
+        })}
+
+        <input
+          ref={inputRef}
+          style={{
+            position: "absolute",
+            top: `${cursor.yPos * cellSize}px`,
+            right: `${cursor.xPos * cellSize}px`,
+            width: `${cellSize}px`,
+            height: `${cellSize}px`,
+            fontSize: `${cellSize * 0.6}px`,
+            textAlign: "center",
+            border: "none",
+            borderRadius: "50%",
+            backgroundColor: "transparent",
+            writingMode: "vertical-rl",
+            transform: "scale(1.05)",
+            transformOrigin: "center",
+            zIndex: 20,
+            outline: "none",
+            color: "transparent",
+            caretColor: "transparent",
+            opacity: getCurrentIndex() >= maxChars ? 0.5 : 1,
+            // boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.8)",
+          }}
+          onPaste={handlePaste}
+          onChange={handleChange}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
+          onKeyDown={handleKeyDown}
+          type="text"
+          autoFocus
+        />
+      </div>
     </div>
   );
 }
