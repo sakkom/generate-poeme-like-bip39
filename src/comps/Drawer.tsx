@@ -9,7 +9,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, children }) => {
   return (
     <div
       style={{
-        height: "60dvh",
+        height: "70dvh",
         width: "15dvw",
         position: "fixed",
         top: "5dvh",

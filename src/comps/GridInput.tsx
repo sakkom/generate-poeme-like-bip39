@@ -96,12 +96,16 @@ export default function GridInput({
         return;
       }
       const lastChar = value[value.length - 1];
-      // 漢字・ひらがな・カタカナのみ許可
-      if (
-        lastChar &&
-        /[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(lastChar)
-      ) {
-        addCharacter(lastChar);
+
+      // isDictionaryがtrueの場合のみ漢字・ひらがな・カタカナに制限
+      if (lastChar) {
+        const isValidChar = isDictionary
+          ? /[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(lastChar)
+          : true; // isDictionary=falseなら全文字許可
+
+        if (isValidChar) {
+          addCharacter(lastChar);
+        }
       }
       clearInput();
     }
@@ -121,15 +125,19 @@ export default function GridInput({
 
       for (const char of value) {
         if (nextIndex >= maxChars) break;
-        // 漢字・ひらがな・カタカナのみ許可
-        if (/[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
+
+        // isDictionaryがtrueの場合のみ漢字・ひらがな・カタカナに制限
+        const isValidChar = isDictionary
+          ? /[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)
+          : true; // isDictionary=falseなら全文字許可
+
+        if (isValidChar) {
           newContent[nextIndex] = char;
           nextIndex++;
         }
       }
 
       updateContent(newContent);
-      //-1でbackspace処理で出現する要素を訂正
       setCursor(indexToPosition(Math.min(nextIndex, maxChars - 1)));
     }
 
@@ -157,8 +165,13 @@ export default function GridInput({
 
     for (const char of text) {
       if (nextIndex >= maxChars) break;
-      // 漢字・ひらがな・カタカナのみ許可（空白も除外）
-      if (/[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
+
+      // isDictionaryがtrueの場合のみ漢字・ひらがな・カタカナに制限
+      const isValidChar = isDictionary
+        ? /[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/.test(char)
+        : true; // isDictionary=falseなら全文字許可
+
+      if (isValidChar) {
         newContent[nextIndex] = char;
         nextIndex++;
       }
@@ -168,6 +181,7 @@ export default function GridInput({
     setCursor(indexToPosition(Math.min(nextIndex, maxChars)));
     clearInput();
   };
+
   const displayContent = [...content];
   if (isIme && imeText) {
     const currentIndex = getCurrentIndex();

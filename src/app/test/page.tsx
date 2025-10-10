@@ -1,57 +1,158 @@
 "use client";
-import { whiteOYC } from "@/comps/color";
-import { Drawer } from "@/comps/Drawer";
-import { useEffect, useState } from "react";
+import { Sha256Helix } from "@/comps/Sha256Helix";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, use, useRef, useMemo } from "react";
 
-export default function Page() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [middleStop, setMiddleStop] = useState(50);
+export default function Page({
+  params,
+}: {
+  params: Promise<{ hash: string }>;
+}) {
+  const router = useRouter();
+  const [poetry, setPoetry] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dimention, setDimention] = useState({ width: 0, height: 0 });
+  const hash = use(params).hash;
+  const boundRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let time = 0;
-    let animationId: number;
+    if (boundRef.current && poetry) {
+      const { width, height } = boundRef.current.getBoundingClientRect();
+      setDimention({ width, height });
+    }
+  }, [poetry]);
 
-    const animate = () => {
-      time += 0.0167;
+  const randomChars = useMemo(() => {
+    if (dimention.width === 0 || dimention.height === 0 || !poetry) return [];
+    const minSize = Math.min(dimention.width, dimention.height);
+    const squareSize = minSize;
+    const startX = (dimention.width - squareSize) / 2;
+    const startY = (dimention.height - squareSize) / 2;
+    return poetry.split("").map((char, index) => ({
+      index,
+      char,
+      randomX: startX + Math.random() * squareSize,
+      randomY: startY + Math.random() * squareSize,
+    }));
+  }, [poetry, dimention]);
 
-      // シンプルなsin関数で呼吸
-      const newMiddleStop = 50 + Math.sin(time) * 10; // 35%~65%
-      setMiddleStop(newMiddleStop);
+  useEffect(() => {
+    const storedPoetry = sessionStorage.getItem(hash);
+    if (!storedPoetry) {
+      router.push("/login");
+      return;
+    }
+    setPoetry(storedPoetry);
+    setIsLoading(false);
+  }, [hash, router]);
 
-      animationId = requestAnimationFrame(animate);
-    };
+  if (isLoading || !poetry) {
+    return (
+      <div className="center">
+        <p style={{ color: "black" }}>Authenticating...</p>
+      </div>
+    );
+  }
 
-    animate();
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, []);
   return (
-    <div>
-      <h1>Welcome to Next.js!</h1>
-      <button onClick={() => setIsDrawerOpen(!isDrawerOpen)}>Drawer</button>
-      <Drawer isOpen={isDrawerOpen}>
-        {/*<h5>This is the content of the drawer.</h5>*/}
-        <button
+    <>
+      <style jsx>{`
+        @keyframes appearAndAlign {
+          0% {
+            opacity: 0;
+            transform: translate3d(var(--random-x), var(--random-y), 0px)
+              scale(0.2);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(var(--final-x), var(--final-y), 0px) scale(1);
+          }
+        }
+      `}</style>
+
+      <div className="center">
+        {/* 3D空間全体のコンテナ */}
+        <div
           style={{
-            height: "20vmin",
-            width: "20vmin",
-            background: `radial-gradient(circle,
-              ${whiteOYC.orange} 0%,
-              ${whiteOYC.yellow} ${middleStop}%,
-              ${whiteOYC.cyan} 100%
-            )`,
-            border: "none",
-            borderRadius: "50%",
-            color: "black",
+            position: "relative",
+            height: "80dvh",
+            width: "80dvw",
+            perspective: "1000px",
+            perspectiveOrigin: "center center",
           }}
         >
-          button
-        </button>
-      </Drawer>
-    </div>
+          {/* HelixとPoetryを同じ3D空間に配置 */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* Sha256Helix */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                transformStyle: "preserve-3d",
+                pointerEvents: "none",
+              }}
+            >
+              <Sha256Helix hash={hash} />
+            </div>
+
+            {/* Poetry */}
+            <div
+              ref={boundRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {randomChars?.map((char) => {
+                const fontSize = 24;
+                const centerX = dimention.width / 2;
+                const centerY = dimention.height / 2;
+                const totalHeight = poetry.length * fontSize;
+                const startY = centerY - totalHeight / 2;
+                const finalY = startY + char.index * fontSize;
+                const finalX = centerX - fontSize / 2;
+
+                return (
+                  <span
+                    className="poetry"
+                    key={char.index}
+                    style={{
+                      position: "absolute",
+                      fontSize: `${fontSize}px`,
+                      color: "black",
+                      writingMode: "vertical-rl",
+                      fontWeight: "bold",
+                      wordBreak: "break-all",
+                      transformStyle: "preserve-3d",
+                      transformOrigin: "center center",
+                      ["--random-x" as any]: `${char.randomX - finalX}px`,
+                      ["--random-y" as any]: `${char.randomY - finalY}px`,
+                      ["--final-x" as any]: `0px`,
+                      ["--final-y" as any]: `0px`,
+                      left: `${finalX}px`,
+                      top: `${finalY}px`,
+                      animation: `appearAndAlign 1s ease-in forwards`,
+                      rotate:
+                        char.index % 2 === 0
+                          ? "calc(360 * 10deg)"
+                          : "calc(360 * 10deg)",
+                    }}
+                  >
+                    {char.char}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

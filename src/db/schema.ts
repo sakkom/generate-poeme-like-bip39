@@ -40,3 +40,4 @@ export type InsertDictionary = typeof dictionaryTable.$inferInsert;
 export type SelectDictionary = typeof dictionaryTable.$inferSelect;
 
 export type InsertCustomDictionary = typeof customDictionaryTable.$inferInsert;
+export type SlectHashTable = typeof hashTable.$inferSelect;

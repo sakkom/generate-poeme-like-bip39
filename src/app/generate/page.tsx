@@ -8,6 +8,7 @@ import { generatePoetry } from "@/utils/generate";
 import { savePrivatePoetry, savePublicPoetry } from "@/utils/database";
 import { Drawer } from "@/comps/Drawer";
 import { PoetryChar } from "@/comps/PoetryChar";
+import { Sha256Helix } from "@/comps/Sha256Helix";
 
 export default function Page() {
   const [poetry, setPoetry] = useState<string>();
@@ -472,51 +473,60 @@ const AfterGeneratedPage = ({
   poetry,
   isPublic,
 }: AfterGeneratedPageProps) => {
-  const [isCopy, setIsCopy] = useState(false);
-  const [showCenterNav, setShowCenterNav] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowCenterNav(true);
-    }, 300);
+      setIsProcessing(false);
+    }, 3000);
+
     return () => clearTimeout(timer);
   }, []);
 
-  const handleCopyPoetry = async () => {
-    if (!poetry) return;
-    try {
-      await navigator.clipboard.writeText(poetry);
-      setIsCopy(true);
-      setTimeout(() => setIsCopy(false), 800);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
-  };
-
-  return (
-    <div>
+  if (isProcessing) {
+    return (
       <div
         style={{
-          color: "black",
-          fontSize: "1.2rem",
-          lineHeight: "1.6",
-          flex: 1,
-          textAlign: "center",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: "2vmin",
+          height: "80vh",
+          fontSize: "1rem",
+          color: "black",
         }}
       >
-        <span>{poetry}</span>
-        <CopyIcon
-          onClick={handleCopyPoetry}
-          style={{ color: "black", cursor: "pointer" }}
-        />
-        {isCopy && (
-          <span style={{ fontSize: "0.8rem", color: "white" }}>コピー</span>
-        )}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div>{poetry}</div>
+          <br />
+          <div>↓</div>
+          <br />
+          <div style={{ display: "flex" }}>
+            {hash.split("").map((char, index) => (
+              <div
+                key={index}
+                style={{
+                  opacity: 0,
+                  animation: `fadeIn 0.15s steps(2, end) ${index * 0.02}s forwards`,
+                }}
+              >
+                {char}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div>
+      <Sha256Helix hash={hash} />
     </div>
   );
 };

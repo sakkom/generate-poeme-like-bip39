@@ -136,3 +136,5 @@ export async function saveCustomWord(
 }
 
 // saveCustomWord("kickout", "きっくあうと");
+
+//クラウドオープンデータベース

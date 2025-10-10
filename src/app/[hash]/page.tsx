@@ -1,4 +1,5 @@
 "use client";
+import { Sha256Helix } from "@/comps/Sha256Helix";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use, useRef, useMemo } from "react";
 
@@ -23,7 +24,6 @@ export default function Page({
 
   const randomChars = useMemo(() => {
     if (dimention.width === 0 || dimention.height === 0 || !poetry) return [];
-
     const minSize = Math.min(dimention.width, dimention.height);
     const squareSize = minSize;
     const startX = (dimention.width - squareSize) / 2;
@@ -62,60 +62,97 @@ export default function Page({
             opacity: 0;
             left: var(--random-x);
             top: var(--random-y);
-            transform: scale(0.2);
+            transform: scale(0.2) translateZ(0px);
           }
           100% {
             opacity: 1;
             left: var(--final-x);
             top: var(--final-y);
             rotate: 0deg;
-            transform: scale(1);
+            transform: scale(1) translateZ(0px);
           }
         }
       `}</style>
 
       <div className="center">
+        {/* 3D空間全体のコンテナ */}
         <div
-          ref={boundRef}
           style={{
             position: "relative",
             height: "80dvh",
             width: "80dvw",
+            perspective: "1000px",
+            perspectiveOrigin: "center center",
+            transformStyle: "preserve-3d", // ← 追加
           }}
         >
-          {randomChars?.map((char) => {
-            const fontSize = 24;
-            const centerX = dimention.width / 2;
-            const finalX = centerX - fontSize / 2;
-            const offsetY = dimention.height * 0.1;
-            const finalY = offsetY + char.index * fontSize;
+          {/* HelixとPoetryを同じ3D空間に配置 */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* Sha256Helix */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                transformStyle: "preserve-3d",
+                pointerEvents: "none",
+              }}
+            >
+              <Sha256Helix hash={hash} />
+            </div>
 
-            return (
-              <span
-                className="poetry"
-                key={char.index}
-                style={{
-                  position: "absolute",
-                  fontSize: `${fontSize}px`,
-                  color: "black",
-                  writingMode: "vertical-rl",
-                  ["--random-x" as any]: `${char.randomX}px`,
-                  ["--random-y" as any]: `${char.randomY}px`,
-                  ["--final-x" as any]: `${finalX}px`,
-                  ["--final-y" as any]: `${finalY}px`,
-                  animation: `appearAndAlign 1s ease-in forwards`,
-                  fontWeight: "bold",
-                  wordBreak: "break-all",
-                  rotate:
-                    char.index % 2 === 0
-                      ? "calc(360 * 10deg)"
-                      : "calc(360 * 10deg)",
-                }}
-              >
-                {char.char}
-              </span>
-            );
-          })}
+            {/* Poetry */}
+            <div
+              ref={boundRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {randomChars?.map((char) => {
+                const fontSize = 24;
+                const centerX = dimention.width / 2;
+                const finalX = centerX - fontSize / 2;
+                const centerY = dimention.height / 2;
+                const totalHeight = poetry.length * fontSize;
+                const startY = centerY - totalHeight / 2;
+                const finalY = startY + char.index * fontSize;
+
+                return (
+                  <span
+                    className="poetry"
+                    key={char.index}
+                    style={{
+                      position: "absolute",
+                      fontSize: `${fontSize}px`,
+                      color: "black",
+                      writingMode: "vertical-rl",
+                      ["--random-x" as any]: `${char.randomX}px`,
+                      ["--random-y" as any]: `${char.randomY}px`,
+                      ["--final-x" as any]: `${finalX}px`,
+                      ["--final-y" as any]: `${finalY}px`,
+                      animation: `appearAndAlign 1s ease-in forwards`,
+                      fontWeight: "bold",
+                      wordBreak: "break-all",
+                      transformStyle: "preserve-3d",
+                      rotate:
+                        char.index % 2 === 0
+                          ? "calc(360 * 10deg)"
+                          : "calc(360 * 10deg)",
+                    }}
+                  >
+                    {char.char}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </>
